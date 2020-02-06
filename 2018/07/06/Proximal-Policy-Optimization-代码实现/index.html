@@ -13,7 +13,7 @@
 
 
 <html class="theme-next gemini" lang="zh-CN">
-<head><meta name="generator" content="Hexo 3.8.0">
+<head><meta name="generator" content="Hexo 3.9.0">
   <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
@@ -103,7 +103,7 @@
 <meta property="og:site_name" content="Fisher&#39;s Blog">
 <meta property="og:description" content="在 Proximal Policy Optimization Algorithms 一文的基础上，可以看出来 PPO 比 TRPO 算法实现起来方便得多，相比于 Actor-Critic 算法，最重要的改动在于把目标函数进行了替换 (surrogate objective) ，同时在更新这个替代的目标函数时对它加上了一定更新幅度的限制。在实际的代码实现中，我们根据论文中的说明，将 Actor 和">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-12-31T01:17:05.164Z">
+<meta property="og:updated_time" content="2019-07-23T08:07:22.372Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Proximal Policy Optimization 代码实现">
 <meta name="twitter:description" content="在 Proximal Policy Optimization Algorithms 一文的基础上，可以看出来 PPO 比 TRPO 算法实现起来方便得多，相比于 Actor-Critic 算法，最重要的改动在于把目标函数进行了替换 (surrogate objective) ，同时在更新这个替代的目标函数时对它加上了一定更新幅度的限制。在实际的代码实现中，我们根据论文中的说明，将 Actor 和">
@@ -182,7 +182,7 @@
 
 </head>
 
-<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
 
   
   
@@ -192,7 +192,7 @@
   <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
-    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
       <div class="header-inner"><div class="site-brand-wrapper">
   <div class="site-meta">
     
@@ -348,20 +348,20 @@
 
   
 
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
   
   
   
   <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2018/07/06/Proximal-Policy-Optimization-代码实现/">
 
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Fisher Chang">
-      <meta itemprop="description" content="">
+      <meta itemprop="description" content>
       <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
     </span>
 
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Fisher's Blog">
     </span>
 
@@ -413,7 +413,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-12-31 09:17:05" itemprop="dateModified" datetime="2018-12-31T09:17:05+08:00">2018-12-31</time>
+                <time title="修改时间：2019-07-23 16:07:22" itemprop="dateModified" datetime="2019-07-23T16:07:22+08:00">2019-07-23</time>
               
             
           </span>
@@ -430,7 +430,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Reinforcement-Learning/" itemprop="url" rel="index"><span itemprop="name">Reinforcement Learning</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Reinforcement-Learning/" itemprop="url" rel="index"><span itemprop="name">Reinforcement Learning</span></a></span>
 
                 
                 
@@ -475,7 +475,8 @@
       
 
       
-        <p>在 <a href="https://bluefisher.github.io/2018/07/03/Proximal-Policy-Optimization-Algorithms/">Proximal Policy Optimization Algorithms</a> 一文的基础上，可以看出来 PPO 比 TRPO 算法实现起来方便得多，相比于 Actor-Critic 算法，最重要的改动在于把目标函数进行了替换 (surrogate objective) ，同时在更新这个替代的目标函数时对它加上了一定更新幅度的限制。在实际的代码实现中，我们根据论文中的说明，将 Actor 和 Critic 合并起来，共用一套神经网络参数，只用一个损失函数来进行优化。直接看<a href="https://github.com/BlueFisher/Reinforcement-Learning/tree/master/Proximal_Policy_Optimization" target="_blank" rel="noopener">完整代码</a></p>
+        <p>在 <a href="https://bluefisher.github.io/2018/07/03/Proximal-Policy-Optimization-Algorithms/">Proximal Policy Optimization Algorithms</a> 一文的基础上，可以看出来 PPO 比 TRPO 算法实现起来方便得多，相比于 Actor-Critic 算法，最重要的改动在于把目标函数进行了替换 (surrogate objective) ，同时在更新这个替代的目标函数时对它加上了一定更新幅度的限制。在实际的代码实现中，我们根据论文中的说明，将 Actor 和 Critic 合并起来，共用一套神经网络参数，只用一个损失函数来进行优化。直接看<a href="https://github.com/BlueFisher/Reinforcement-Learning/tree/master/Proximal_Policy_Optimization" target="_blank" rel="noopener">完整代码</a>。</p>
+<p>在 <a href="https://github.com/BlueFisher/RL-PPO-with-Unity" class="uri" target="_blank" rel="noopener">https://github.com/BlueFisher/RL-PPO-with-Unity</a> 项目中有更加完善，功能更加强大的 PPO 代码，智能体运行环境基于 Unity ML-Agents Toolkit 。</p>
 <a id="more"></a>
 <h1 id="ppo">PPO</h1>
 <p>最重要的 PPO 类架构为：</p>
@@ -647,7 +648,7 @@ L^{CLIP+VF+S}_t(\theta) = \hat{\mathbb{E}}_t[L^{CLIP}_t(\theta) -c_1L^{VF}_t + c
 
       <div class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
-          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
               <img class="site-author-image" itemprop="image" src="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200" alt="Fisher Chang">
             
@@ -662,7 +663,7 @@ L^{CLIP+VF+S}_t(\theta) = \hat{\mathbb{E}}_t[L^{CLIP}_t(\theta) -c_1L^{VF}_t + c
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">43</span>
+                    <span class="site-state-item-count">49</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -685,7 +686,9 @@ L^{CLIP+VF+S}_t(\theta) = \hat{\mathbb{E}}_t[L^{CLIP}_t(\theta) -c_1L^{VF}_t + c
                     
                       
                     
-                    <span class="site-state-item-count">5</span>
+                      
+                    
+                    <span class="site-state-item-count">6</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -722,7 +725,11 @@ L^{CLIP+VF+S}_t(\theta) = \hat{\mathbb{E}}_t[L^{CLIP}_t(\theta) -c_1L^{VF}_t + c
                     
                       
                     
-                    <span class="site-state-item-count">12</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">14</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -787,6 +794,20 @@ L^{CLIP+VF+S}_t(\theta) = \hat{\mathbb{E}}_t[L^{CLIP}_t(\theta) -c_1L^{VF}_t + c
 
           
           
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://stepneverstop.github.io/" title="https://stepneverstop.github.io/" rel="noopener" target="_blank">Keavnn</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
 
           
             
@@ -834,7 +855,7 @@ L^{CLIP+VF+S}_t(\theta) = \hat{\mathbb{E}}_t[L^{CLIP}_t(\theta) -c_1L^{VF}_t + c
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; 2016 – <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; 2016 – <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user-circle"></i>
   </span>
@@ -846,7 +867,7 @@ L^{CLIP+VF+S}_t(\theta) = \hat{\mathbb{E}}_t[L^{CLIP}_t(\theta) -c_1L^{VF}_t + c
 </div>
 
 
-  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0</div>
 
 
 

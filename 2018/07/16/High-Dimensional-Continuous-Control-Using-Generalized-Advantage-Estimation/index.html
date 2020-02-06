@@ -13,7 +13,7 @@
 
 
 <html class="theme-next gemini" lang="zh-CN">
-<head><meta name="generator" content="Hexo 3.8.0">
+<head><meta name="generator" content="Hexo 3.9.0">
   <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
@@ -103,7 +103,7 @@
 <meta property="og:site_name" content="Fisher&#39;s Blog">
 <meta property="og:description" content="本文简单介绍一下 High-Dimensional Continuous Control Using Generalized Advantage Estimation 这篇论文。该论文主要做了两件事：  使用一种类似于 TD(λ) 的优势函数的估计形式来做到值函数的方差偏差平衡 (bias-variance tradeoff) 将置信域优化算法 (trust region optimizat">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-11-14T08:15:35.225Z">
+<meta property="og:updated_time" content="2019-11-26T05:29:05.215Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="High-Dimensional Continuous Control Using Generalized Advantage Estimation">
 <meta name="twitter:description" content="本文简单介绍一下 High-Dimensional Continuous Control Using Generalized Advantage Estimation 这篇论文。该论文主要做了两件事：  使用一种类似于 TD(λ) 的优势函数的估计形式来做到值函数的方差偏差平衡 (bias-variance tradeoff) 将置信域优化算法 (trust region optimizat">
@@ -182,7 +182,7 @@
 
 </head>
 
-<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
 
   
   
@@ -192,7 +192,7 @@
   <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
-    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
       <div class="header-inner"><div class="site-brand-wrapper">
   <div class="site-meta">
     
@@ -348,20 +348,20 @@
 
   
 
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
   
   
   
   <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2018/07/16/High-Dimensional-Continuous-Control-Using-Generalized-Advantage-Estimation/">
 
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Fisher Chang">
-      <meta itemprop="description" content="">
+      <meta itemprop="description" content>
       <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
     </span>
 
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Fisher's Blog">
     </span>
 
@@ -413,7 +413,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-11-14 16:15:35" itemprop="dateModified" datetime="2018-11-14T16:15:35+08:00">2018-11-14</time>
+                <time title="修改时间：2019-11-26 13:29:05" itemprop="dateModified" datetime="2019-11-26T13:29:05+08:00">2019-11-26</time>
               
             
           </span>
@@ -430,7 +430,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Reinforcement-Learning/" itemprop="url" rel="index"><span itemprop="name">Reinforcement Learning</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Reinforcement-Learning/" itemprop="url" rel="index"><span itemprop="name">Reinforcement Learning</span></a></span>
 
                 
                 
@@ -500,19 +500,18 @@ g^\gamma = \mathbb{E}_{s_{0:\infty},\ a_{0:\infty}}\left[ \sum_{t=0}^\infty A^{\
 \]</span> 其中 <span class="math inline">\(n\)</span> 为批处理的索引。</p>
 <p>用 <span class="math inline">\(V\)</span> 来表示价值函数的近似估计，定义 TD 误差 ： <span class="math inline">\(\delta_t^V = r_t + \gamma V(s_{t+1})-V(s_t)\)</span> ，在 <a href="https://bluefisher.github.io/2018/05/10/%E7%AD%96%E7%95%A5%E6%A2%AF%E5%BA%A6-Policy-Gradient/">策略梯度 Policy Gradient</a> 中也介绍过，TD 误差可以看作是优势函数的无偏估计，即如果 <span class="math inline">\(V=V^{\pi,\gamma}\)</span> 的话， <span class="math inline">\(\mathbb{E}_{s_{t+1}}\left[ \delta_t^{V^{\pi,\gamma}} \right] = A^{\pi,\gamma}(s_t,a_t)\)</span></p>
 <p>仿照 TD(λ) ，我们不仅仅让优势函数往前看一步，而是向前看 <span class="math inline">\(k\)</span> 步，那么我们定义 <span class="math inline">\(\hat{A}_t^{(k)}\)</span> ： <span class="math display">\[
-\begin{align*}
-\hat{A}_t^{(1)} &amp;:= \delta_t^V \\
-\hat{A}_t^{(2)} &amp;:= \delta_t^V + \gamma\delta_{t+1}^V \\
-\hat{A}_t^{(3)} &amp;:= \delta_t^V + \gamma\delta_{t+1}^V + \gamma^2\delta_{t+2}^V \\
-\vdots\\
-\hat{A}_t^{(k)} &amp;:=\sum_{l=0}^{k-1} \gamma^l \delta_{t+l}^V = -V(s_t) + r_t+\gamma r_{t+1} + \cdots + \gamma^{k-1}r_{t+k-1} + \gamma^k V(s_{t+k})
-\end{align*}
-\newcommand{gae}{\text{GAE}}
+\begin{aligned} 
+\hat{A}_{t}^{(1)} &amp;:=\delta_{t}^{V} \\ 
+\hat{A}_{t}^{(2)} &amp;:=\delta_{t}^{V}+\gamma \delta_{t+1}^{V} \\ 
+\hat{A}_{t}^{(3)} &amp;:=\delta_{t}^{V}+\gamma \delta_{t+1}^{V}+\gamma^{2} \delta_{t+2}^{V}=-V\left(s_{t}\right)+r_{t}+\gamma r_{t+1}+\gamma^{2} r_{t+2}+\gamma^{3} V\left(s_{t+3}\right) \\ 
+\hat{A}_{t}^{(k)} &amp;:=\sum_{l=0}^{k-1} \gamma^{l} \delta_{t+l}^{V}=-V\left(s_{t}\right)+r_{t}+\gamma r_{t+1}+\cdots+\gamma^{k-1} r_{t+k-1}+\gamma^{k} V\left(s_{t+k}\right) \end{aligned}
 \]</span> 接着我们将这 <span class="math inline">\(k\)</span> 步取平均，得到本文最关键的生成式优势函数估计 (generalized advantage estimator) <span class="math inline">\(\gae(\gamma,\lambda)\)</span> ： <span class="math display">\[
-\begin{align*}
-\hat{A}_t^{\gae(\gamma,\lambda)} &amp;:= (1-\lambda) \left( \hat{A}_t^{(1)}+\lambda\hat{A}_t^{(2)}+\lambda^2\hat{A}_t^{(3)} + \cdots \right) \\
-&amp;=\sum_{l=0}^\infty (\gamma \lambda)^l \delta_{t+l}^V
-\end{align*}
+\begin{aligned} \hat{A}_{t}^{\mathrm{GAE}(\gamma, \lambda)} &amp;:=(1-\lambda)\left(\hat{A}_{t}^{(1)}+\lambda \hat{A}_{t}^{(2)}+\lambda^{2} \hat{A}_{t}^{(3)}+\ldots\right) \\
+&amp;=(1-\lambda)\left(\delta_{t}^{V}+\lambda\left(\delta_{t}^{V}+\gamma \delta_{t+1}^{V}\right)+\lambda^{2}\left(\delta_{t}^{V}+\gamma \delta_{t+1}^{V}+\gamma^{2} \delta_{t+2}^{V}\right)+\ldots\right) \\
+&amp;=(1-\lambda)\left(\delta_{t}^{V}\left(1+\lambda+\lambda^{2}+\ldots\right)+\gamma \delta_{t+1}^{V}\left(\lambda+\lambda^{2}+\lambda^{2}+\ldots\right)\right.\\
+&amp;\left.\quad+\gamma \delta_{t+2}^{V}\left(\lambda^{2}+\lambda^{3}+\lambda^{4}+\ldots\right)+\ldots\right) \\
+&amp;=(1-\lambda)\left(\delta_{t}^{V}\left(\frac{1}{1-\lambda}\right)+\gamma \delta_{t+1}^{V}\left(\frac{\lambda}{1-\lambda}\right)+\gamma^{2} \delta_{t+2}^{V}\left(\frac{\lambda^{2}}{1-\lambda}\right)+\ldots\right) \\
+&amp;=\sum_{l=0}^{\infty}(\gamma \lambda)^{l} \delta_{t+l}^{V} \end{aligned}
 \]</span> 可以发现，当 <span class="math inline">\(\lambda=0\)</span> 时，<span class="math inline">\(\hat{A}_t:=\delta_t\)</span> ，此时会引入偏差；当 <span class="math inline">\(\lambda=1\)</span> 时，<span class="math inline">\(\hat{A}_t:=\sum_{l=0}^\infty\gamma^l r_{t+l}-V(s_t)\)</span> ，此时会产生很高的方差，所以为了做到偏差方差平衡，<span class="math inline">\(0&lt;\lambda&lt;1\)</span> 很关键。在实验中，作者发现 <span class="math inline">\(\lambda\)</span> 其实比 <span class="math inline">\(\gamma\)</span> 引入的偏差要小得多。</p>
 <p>使用 GAE ，我们构建带有偏差的策略梯度估计： <span class="math display">\[
 g^\gamma \approx \mathbb{E}\left[ \sum_{t=0}^\infty \nabla_\theta \log\pi_\theta(a_t|s_t) \hat{A}_t^{\gae(\gamma,\lambda)} \right] =  \mathbb{E}\left[ \sum_{t=0}^\infty \nabla_\theta \log\pi_\theta(a_t|s_t) \sum_{l=0}^\infty (\gamma \lambda)^l \delta_{t+l}^V \right]
@@ -670,7 +669,7 @@ g^\gamma \approx \mathbb{E}\left[ \sum_{t=0}^\infty \nabla_\theta \log\pi_\theta
 
       <div class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
-          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
               <img class="site-author-image" itemprop="image" src="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200" alt="Fisher Chang">
             
@@ -685,7 +684,7 @@ g^\gamma \approx \mathbb{E}\left[ \sum_{t=0}^\infty \nabla_\theta \log\pi_\theta
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">43</span>
+                    <span class="site-state-item-count">49</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -708,7 +707,9 @@ g^\gamma \approx \mathbb{E}\left[ \sum_{t=0}^\infty \nabla_\theta \log\pi_\theta
                     
                       
                     
-                    <span class="site-state-item-count">5</span>
+                      
+                    
+                    <span class="site-state-item-count">6</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -745,7 +746,11 @@ g^\gamma \approx \mathbb{E}\left[ \sum_{t=0}^\infty \nabla_\theta \log\pi_\theta
                     
                       
                     
-                    <span class="site-state-item-count">12</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">14</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -810,6 +815,20 @@ g^\gamma \approx \mathbb{E}\left[ \sum_{t=0}^\infty \nabla_\theta \log\pi_\theta
 
           
           
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://stepneverstop.github.io/" title="https://stepneverstop.github.io/" rel="noopener" target="_blank">Keavnn</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
 
           
             
@@ -857,7 +876,7 @@ g^\gamma \approx \mathbb{E}\left[ \sum_{t=0}^\infty \nabla_\theta \log\pi_\theta
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; 2016 – <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; 2016 – <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user-circle"></i>
   </span>
@@ -869,7 +888,7 @@ g^\gamma \approx \mathbb{E}\left[ \sum_{t=0}^\infty \nabla_\theta \log\pi_\theta
 </div>
 
 
-  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0</div>
 
 
 

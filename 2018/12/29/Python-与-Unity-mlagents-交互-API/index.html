@@ -13,7 +13,7 @@
 
 
 <html class="theme-next gemini" lang="zh-CN">
-<head><meta name="generator" content="Hexo 3.8.0">
+<head><meta name="generator" content="Hexo 3.9.0">
   <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
@@ -103,7 +103,7 @@
 <meta property="og:site_name" content="Fisher&#39;s Blog">
 <meta property="og:description" content="本文基于 ml-agents 中与 python 交互的文档 Unity ML-Agents Python Interface and Trainers ，更加详细地介绍整个交互 API">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-02-03T05:39:43.570Z">
+<meta property="og:updated_time" content="2019-07-19T02:29:22.430Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Python 与 Unity mlagents 交互 API">
 <meta name="twitter:description" content="本文基于 ml-agents 中与 python 交互的文档 Unity ML-Agents Python Interface and Trainers ，更加详细地介绍整个交互 API">
@@ -182,7 +182,7 @@
 
 </head>
 
-<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
 
   
   
@@ -192,7 +192,7 @@
   <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
-    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
       <div class="header-inner"><div class="site-brand-wrapper">
   <div class="site-meta">
     
@@ -348,20 +348,20 @@
 
   
 
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
   
   
   
   <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2018/12/29/Python-与-Unity-mlagents-交互-API/">
 
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Fisher Chang">
-      <meta itemprop="description" content="">
+      <meta itemprop="description" content>
       <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
     </span>
 
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Fisher's Blog">
     </span>
 
@@ -413,7 +413,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-02-03 13:39:43" itemprop="dateModified" datetime="2019-02-03T13:39:43+08:00">2019-02-03</time>
+                <time title="修改时间：2019-07-19 10:29:22" itemprop="dateModified" datetime="2019-07-19T10:29:22+08:00">2019-07-19</time>
               
             
           </span>
@@ -430,7 +430,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a></span>
 
                 
                 
@@ -550,21 +550,25 @@ vector_action_descriptions: [&#39;3&#39;, &#39;3&#39;]
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">brain_infos = env.reset(train_mode=<span class="keyword">True</span>, config=&#123;</span><br><span class="line">    <span class="string">'copy'</span>: <span class="number">1</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
 <pre><code>INFO:mlagents.envs:Academy reset with parameters: copy -&gt; 1</code></pre>
 <p><code>vector_observations</code> 是一个 <code>numpy</code> ，维度为 <code>(智能体数量, 向量状态的长度 * 向量状态栈大小)</code> ，其中向量状态栈代表有多少状态被储存起来一起作为当前的状态</p>
-<p><code>visual_observations</code> 是一个 <code>list</code> ，个数为 <code>Brain</code> 中设置的摄像机的个数，其中每一个元素为一个四维的 <code>numpy</code> ，维度为 <code>(智能体数量，长，宽，通道数)</code> 。如每个 <code>Brain</code> 要设置左右两台观测的摄像机，则 <code>list</code> 长度为 2 ，分别代表左右两个摄像机。第一个元素为所有智能体的左摄像机的图像集合，第二个元素为所有只能提的右摄像机的图像集合。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> name <span class="keyword">in</span> env.brain_names:</span><br><span class="line">    info = brain_infos[name]</span><br><span class="line">    print(info)</span><br><span class="line">    print(<span class="string">'vector_observations: '</span>, end=<span class="string">''</span>)  <span class="comment"># 向量状态 numpy</span></span><br><span class="line">    print(info.vector_observations.shape)</span><br><span class="line">    print(<span class="string">'visual_observations: '</span>)  <span class="comment"># 图像状态 list</span></span><br><span class="line">    <span class="keyword">for</span> i, obs_per_camera <span class="keyword">in</span> enumerate(info.visual_observations):</span><br><span class="line">        print(<span class="string">'\t'</span>, obs_per_camera.shape)</span><br><span class="line">        <span class="keyword">for</span> j, ob <span class="keyword">in</span> enumerate(obs_per_camera):</span><br><span class="line"><span class="comment">#             plt.imsave(f'&#123;i&#125;_&#123;j&#125;.png', ob)</span></span><br><span class="line">            plt.imshow(ob)</span><br><span class="line">            plt.show()</span><br><span class="line">    print(<span class="string">'text_observations: '</span>, end=<span class="string">''</span>)  <span class="comment"># 文字状态 list</span></span><br><span class="line">    print(info.text_observations)</span><br><span class="line">    print(<span class="string">'rewards: '</span>, end=<span class="string">''</span>)  <span class="comment"># 奖励 list</span></span><br><span class="line">    print(info.rewards)</span><br><span class="line">    print(<span class="string">'local_done: '</span>, end=<span class="string">''</span>)  <span class="comment"># 智能体回合是否结束 list</span></span><br><span class="line">    print(info.local_done)</span><br><span class="line">    print(<span class="string">'max_reached: '</span>, end=<span class="string">''</span>)  <span class="comment"># 智能体回合是否到达最大步数（如果达到最大步数，无论智能体回合是否结束，local_done 也为 True） list</span></span><br><span class="line">    print(info.max_reached)</span><br><span class="line">    print(<span class="string">'previous_vector_actions: '</span>, end=<span class="string">''</span>)  <span class="comment"># 上一个向量行为 numpy</span></span><br><span class="line">    print(info.previous_vector_actions.shape)</span><br><span class="line">    print(<span class="string">'agents: '</span>, end=<span class="string">''</span>)  <span class="comment"># 所有智能体 id list</span></span><br><span class="line">    print(info.agents)</span><br><span class="line">    print(<span class="string">'---------'</span>)</span><br></pre></td></tr></table></figure>
-<pre><code>&lt;mlagents.envs.brain.BrainInfo object at 0x0000023EC1FFEDD8&gt;
+<p><code>visual_observations</code> 是一个 <code>list</code> ，个数为 <code>Brain</code> 中设置的摄像机的个数，其中每一个元素为也为一个 <code>list</code> ，长度为智能体数量。该 <code>list</code> 中的元素为一个三维的 <code>numpy</code> ，维度为 <code>(长，宽，通道数)</code> 。如每个 <code>Brain</code> 要设置左右两台观测的摄像机，则 <code>visual_observations</code> 长度为 2 ，分别代表左右两个摄像机。第一个元素为所有智能体的左摄像机的图像集合，第二个元素为所有只能提的右摄像机的图像集合。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> name <span class="keyword">in</span> env.brain_names:</span><br><span class="line">    params = env.brains[name]</span><br><span class="line">    info = brain_infos[name]</span><br><span class="line">    print(info)</span><br><span class="line">    print(<span class="string">'vector_observations: '</span>, end=<span class="string">''</span>)  <span class="comment"># 向量状态 numpy</span></span><br><span class="line">    print(info.vector_observations.shape)</span><br><span class="line">    print(<span class="string">'visual_observations: '</span>)  <span class="comment"># 图像状态 list</span></span><br><span class="line">    <span class="keyword">for</span> i, obs_per_camera <span class="keyword">in</span> enumerate(info.visual_observations):</span><br><span class="line">        print(<span class="string">'\t'</span>, <span class="string">'number of agents'</span>, len(obs_per_camera))</span><br><span class="line">        <span class="keyword">for</span> j, ob <span class="keyword">in</span> enumerate(obs_per_camera):</span><br><span class="line">            print(ob.shape)</span><br><span class="line">            <span class="keyword">if</span> params.camera_resolutions[i][<span class="string">'blackAndWhite'</span>]:</span><br><span class="line">                plt.imshow(ob[:, :, <span class="number">0</span>], cmap=plt.cm.gray)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                plt.imshow(ob)</span><br><span class="line">            plt.show()</span><br><span class="line">    print(<span class="string">'text_observations: '</span>, end=<span class="string">''</span>)  <span class="comment"># 文字状态 list</span></span><br><span class="line">    print(info.text_observations)</span><br><span class="line">    print(<span class="string">'rewards: '</span>, end=<span class="string">''</span>)  <span class="comment"># 奖励 list</span></span><br><span class="line">    print(info.rewards)</span><br><span class="line">    print(<span class="string">'local_done: '</span>, end=<span class="string">''</span>)  <span class="comment"># 智能体回合是否结束 list</span></span><br><span class="line">    print(info.local_done)</span><br><span class="line">    print(<span class="string">'max_reached: '</span>, end=<span class="string">''</span>)  <span class="comment"># 智能体回合是否到达最大步数（如果达到最大步数，无论智能体回合是否结束，local_done 也为 True） list</span></span><br><span class="line">    print(info.max_reached)</span><br><span class="line">    print(<span class="string">'previous_vector_actions: '</span>, end=<span class="string">''</span>)  <span class="comment"># 上一个向量行为 numpy</span></span><br><span class="line">    print(info.previous_vector_actions.shape)</span><br><span class="line">    print(<span class="string">'agents: '</span>, end=<span class="string">''</span>)  <span class="comment"># 所有智能体 id list</span></span><br><span class="line">    print(info.agents)</span><br><span class="line">    print(<span class="string">'---------'</span>)</span><br></pre></td></tr></table></figure>
+<pre><code>&lt;mlagents.envs.brain.BrainInfo object at 0x0000020F88ED0FD0&gt;
 vector_observations: (2, 8)
 visual_observations: 
-     (2, 450, 500, 3)
-     (2, 550, 600, 3)
+     number of agents 2
+     (450, 500, 3)
+     (450, 500, 3)
+     number of agents 2
+     (550, 600, 3)
+     (550, 600, 3)
 text_observations: [&#39;&#39;, &#39;&#39;]
 rewards: [0.0, 0.0]
 local_done: [False, False]
 max_reached: [False, False]
 previous_vector_actions: (2, 2)
-agents: [12450, 12472]
+agents: [14714, 14736]
 ---------
-&lt;mlagents.envs.brain.BrainInfo object at 0x0000023EC5328320&gt;
+&lt;mlagents.envs.brain.BrainInfo object at 0x0000020F88F69978&gt;
 vector_observations: (1, 8)
 visual_observations: 
 text_observations: [&#39;&#39;]
@@ -572,7 +576,7 @@ rewards: [0.0]
 local_done: [False]
 max_reached: [False]
 previous_vector_actions: (1, 2)
-agents: [12394]
+agents: [14658]
 ---------</code></pre>
 <h2 id="一个最简单的交互方式">一个最简单的交互方式</h2>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">env.reset(train_mode=<span class="keyword">False</span>, config=&#123;</span><br><span class="line">    <span class="string">'copy'</span>: <span class="number">1</span></span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">200</span>):</span><br><span class="line">    env.step(&#123;</span><br><span class="line">        <span class="string">'Brain1'</span>: np.random.randn(<span class="number">2</span>, <span class="number">2</span>),</span><br><span class="line">        <span class="string">'Brain2'</span>: np.random.randn(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
@@ -721,7 +725,7 @@ agents: [12394]
 
       <div class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
-          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
               <img class="site-author-image" itemprop="image" src="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200" alt="Fisher Chang">
             
@@ -736,7 +740,7 @@ agents: [12394]
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">43</span>
+                    <span class="site-state-item-count">49</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -759,7 +763,9 @@ agents: [12394]
                     
                       
                     
-                    <span class="site-state-item-count">5</span>
+                      
+                    
+                    <span class="site-state-item-count">6</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -796,7 +802,11 @@ agents: [12394]
                     
                       
                     
-                    <span class="site-state-item-count">12</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">14</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -861,6 +871,20 @@ agents: [12394]
 
           
           
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://stepneverstop.github.io/" title="https://stepneverstop.github.io/" rel="noopener" target="_blank">Keavnn</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
 
           
             
@@ -908,7 +932,7 @@ agents: [12394]
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; 2016 – <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; 2016 – <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user-circle"></i>
   </span>
@@ -920,7 +944,7 @@ agents: [12394]
 </div>
 
 
-  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0</div>
 
 
 
