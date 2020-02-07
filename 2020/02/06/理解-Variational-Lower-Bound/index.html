@@ -104,7 +104,7 @@
 <meta property="og:description" content="本文翻译自 Understanding the Variational Lower Bound, Xitong Yang, September 13, 2017 简介 变分贝叶斯（Variational Bayesian (VB)）是一类非常受欢迎的统计类机器学习方法。VB 非常有用的一个特性是推断优化的二元性：我们可以将统计推断问题（从一个随机变量的值推断出另一种随机变量的值）作为优化问题（">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://bluefisher.github.io/images/2020-02-06-理解-Variational-Lower-Bound/image-20200206195028885.png">
-<meta property="og:updated_time" content="2020-02-06T13:07:38.077Z">
+<meta property="og:updated_time" content="2020-02-07T08:13:33.094Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="理解 Variational Lower Bound">
 <meta name="twitter:description" content="本文翻译自 Understanding the Variational Lower Bound, Xitong Yang, September 13, 2017 简介 变分贝叶斯（Variational Bayesian (VB)）是一类非常受欢迎的统计类机器学习方法。VB 非常有用的一个特性是推断优化的二元性：我们可以将统计推断问题（从一个随机变量的值推断出另一种随机变量的值）作为优化问题（">
@@ -398,12 +398,24 @@
                 
               
 
-              <time title="创建时间：2020-02-06 19:27:51 / 修改时间：21:07:38" itemprop="dateCreated datePublished" datetime="2020-02-06T19:27:51+08:00">2020-02-06</time>
+              <time title="创建时间：2020-02-06 19:27:51" itemprop="dateCreated datePublished" datetime="2020-02-06T19:27:51+08:00">2020-02-06</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-02-07 16:13:33" itemprop="dateModified" datetime="2020-02-07T16:13:33+08:00">2020-02-07</time>
               
             
           </span>
@@ -486,12 +498,12 @@ p(Z | X)=\frac{p(X | Z) p(Z)}{p(X)}=\frac{p(X | Z) p(Z)}{\int_{Z} p(X, Z)}
 &amp;=\mathbb{E}_{q}[\log p(X, Z)]+H[Z] \tag{5}
 \end{align}
 \]</span> 公式 (5) 就是 <strong>variational lower bound</strong>，也被称为 ELBO。</p>
-<p>公式 (2) 中的 <span class="math inline">\(q(Z)\)</span> 是我们在 VB 中后验概率 <span class="math inline">\(p(Z|X)\)</span> 的估计概率。这里我们暂且将它视为任意一种分布，推到也依然成立。公式 (4) 对凸函数 log 运用了琴生不等式 <span class="math inline">\(f(\mathbb{E}[X]) \leq \mathbb{E}[f(X)]\)</span> 。<span class="math inline">\(H[Z]=-\mathbb{E}_{q}[\log q(Z)]\)</span> 是香农熵。</p>
+<p>公式 (2) 中的 <span class="math inline">\(q(Z)\)</span> 是我们在 VB 中后验概率 <span class="math inline">\(p(Z|X)\)</span> 的估计概率。这里我们暂且将它视为任意一种分布，推导也依然成立。公式 (4) 对凸函数 log 运用了琴生不等式 <span class="math inline">\(f(\mathbb{E}[X]) \leq \mathbb{E}[f(X)]\)</span> 。<span class="math inline">\(H[Z]=-\mathbb{E}_{q}[\log q(Z)]\)</span> 是香农熵。</p>
 <p>我们做如下标记： <span class="math display">\[
 L=\mathbb{E}_{q}[\log p(X, Z)]+H[Z]
 \]</span> 很明显 <span class="math inline">\(L\)</span> 就是观测变量的 log 概率的一个 lower bound。也就是说，如果我们想要去最大化边缘分布，我们可以转而最大化它的 variational lower bound <span class="math inline">\(L\)</span> 。</p>
 <h2 id="第二个推导kl-散度">第二个推导：KL 散度</h2>
-<p>在上一小节中，我们没有过多关注于分布 <span class="math inline">\(p(Z)\)</span> 。然后 <span class="math inline">\(p(Z)\)</span> 确是 VB 的核心动机。在很多情况下，后验概率 <span class="math inline">\(p(Z|X)\)</span> 的计算是十分困难的，比如我们可能需要对所有的隐变量做积分（求和）来计算分母。</p>
+<p>在上一小节中，我们没有过多关注于分布 <span class="math inline">\(p(Z)\)</span> ，然而 <span class="math inline">\(p(Z)\)</span> 确是 VB 的核心动机。在很多情况下，后验概率 <span class="math inline">\(p(Z|X)\)</span> 的计算是十分困难的，比如我们可能需要对所有的隐变量做积分（求和）来计算分母。</p>
 <p>变分方法的主要思想就是找一个估计的概率分布 <span class="math inline">\(q(Z)\)</span> 来尽可能地接近后验概率 <span class="math inline">\(p(Z|X)\)</span> 。这些估计的概率分布可以有它们独有的<em>变分参数（variational parameters）</em>：<span class="math inline">\(q(Z|\theta)\)</span> ，所以我们想要去寻找这些参数来使 <span class="math inline">\(q\)</span> 尽可能接近后验概率。当然 <span class="math inline">\(q(Z)\)</span> 的分布肯定要在推断中相对来说更加简单好求一些。</p>
 <p>为了衡量两个分布 <span class="math inline">\(q(Z)\)</span> 和 <span class="math inline">\(p(Z|X)\)</span> ，一个常用的标准就是就是 Kullback-Leibler (KL) 散度。变分推断的 KL 散度为： <span class="math display">\[
 \begin{align} 
@@ -504,6 +516,16 @@ K L[q(Z) \| p(Z | X)] &amp;=\int_{Z} q(Z) \log \frac{q(Z)}{p(Z | X)} \tag{6}\\
 \]</span> 其中 <span class="math inline">\(L\)</span> 就是在上一小节定义的 <strong>variational lower bound</strong> 。公式 (10) 是归一化常量 <span class="math inline">\(\int_Z q(Z)=1\)</span> 而推导得来。重新整理可以得到： <span class="math display">\[
 L=\log p(X)-K L[q(Z) \| p(Z | X)]
 \]</span> 因为 KL 散度永远是 <span class="math inline">\(\geq 0\)</span> 的，所以，再一次，我们得到了 <span class="math inline">\(L\leq \log p(X)\)</span> 是观测变量的分布的一个 lower bound。同时我们也知道了它们之间的区别就在于估计分布和真实分布之间的 KL 散度。换句话说，如果估计分布与真实后验分布完美接近，那么 lower bound <span class="math inline">\(L\)</span> 就等于 log 概率。</p>
+<h1 id="例子">例子</h1>
+<h2 id="视觉注意力中的多目标识别问题">视觉注意力中的多目标识别问题</h2>
+<p>现在，我们可以使用我们对 variational lower bound 的理解来推导一下实际问题中的学习方法。我们使用 <em>Multiple object recognition with visual attention</em> 这篇论文来做例子。</p>
+<p>首先，我们想要做的是最大化类别标签的 log 似然：<span class="math inline">\(\log p(y|I,W)\)</span> ，其中 <span class="math inline">\(I\)</span> 是图像，<span class="math inline">\(W\)</span> 是模型参数，<span class="math inline">\(y\)</span> 是类别标签，<span class="math inline">\(y\)</span> 也可以被看成是观测变量。目标函数就可以被重写成含有边缘化隐变量 <span class="math inline">\(l\)</span> （对 <span class="math inline">\(l\)</span> 积分）的形式： <span class="math display">\[
+\log p(y | I, W)=\log \sum_{l} p(l | I, W) p(y | l, I, W)
+\]</span> 我们可以直接使用琴生不等式来得到该目标函数的 lower bound ： <span class="math display">\[
+\log \sum_{l} p(l | I, W) p(y | l, I, W) \geq \sum_{l} p(l | I, W) \log p(y | l, I, W)
+\]</span> 当然我们也可以用观测变量的边缘分布的 variational lower bound，即设置 <span class="math inline">\(q(l)=p(l|I,W)\)</span> 来得到相同的结果： <span class="math display">\[
+\log p(y | I, W) \geq \sum_{l} q(l) \log \frac{p(y, l | I, W)}{q(l)}=\sum_{l} p(l | I, W) \log p(y | l, I, W)
+\]</span></p>
 
       
     </div>
@@ -815,7 +837,7 @@ L=\log p(X)-K L[q(Z) \| p(Z | X)]
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#variational-lower-bound"><span class="nav-number">2.</span> <span class="nav-text">Variational Lower Bound</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题设置"><span class="nav-number">2.1.</span> <span class="nav-text">问题设置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第一个推导琴生不等式"><span class="nav-number">2.2.</span> <span class="nav-text">第一个推导：琴生不等式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第二个推导kl-散度"><span class="nav-number">2.3.</span> <span class="nav-text">第二个推导：KL 散度</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#variational-lower-bound"><span class="nav-number">2.</span> <span class="nav-text">Variational Lower Bound</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题设置"><span class="nav-number">2.1.</span> <span class="nav-text">问题设置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第一个推导琴生不等式"><span class="nav-number">2.2.</span> <span class="nav-text">第一个推导：琴生不等式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第二个推导kl-散度"><span class="nav-number">2.3.</span> <span class="nav-text">第二个推导：KL 散度</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#例子"><span class="nav-number">3.</span> <span class="nav-text">例子</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#视觉注意力中的多目标识别问题"><span class="nav-number">3.1.</span> <span class="nav-text">视觉注意力中的多目标识别问题</span></a></li></ol></li></ol></div>
             
 
           </div>
