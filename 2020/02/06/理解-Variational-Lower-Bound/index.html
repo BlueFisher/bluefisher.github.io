@@ -95,19 +95,19 @@
 
 
 
-  <meta name="description" content="本文翻译自 Understanding the Variational Lower Bound, Xitong Yang, September 13, 2017 简介 变分贝叶斯（Variational Bayesian (VB)）是一类非常受欢迎的统计类机器学习方法。VB 非常有用的一个特性是推断优化的二元性：我们可以将统计推断问题（从一个随机变量的值推断出另一种随机变量的值）作为优化问题（">
+  <meta name="description" content="本文翻译自 Understanding the Variational Lower Bound, Xitong Yang, September 13, 2017 变分贝叶斯（Variational Bayesian (VB)）是一类非常受欢迎的统计类机器学习方法。VB 非常有用的一个特性是推断优化的二元性：我们可以将统计推断问题（从一个随机变量的值推断出另一种随机变量的值）作为优化问题（找到参变">
 <meta name="keywords" content="ml">
 <meta property="og:type" content="article">
 <meta property="og:title" content="理解 Variational Lower Bound">
 <meta property="og:url" content="https://bluefisher.github.io/2020/02/06/理解-Variational-Lower-Bound/index.html">
 <meta property="og:site_name" content="Fisher&#39;s Blog">
-<meta property="og:description" content="本文翻译自 Understanding the Variational Lower Bound, Xitong Yang, September 13, 2017 简介 变分贝叶斯（Variational Bayesian (VB)）是一类非常受欢迎的统计类机器学习方法。VB 非常有用的一个特性是推断优化的二元性：我们可以将统计推断问题（从一个随机变量的值推断出另一种随机变量的值）作为优化问题（">
+<meta property="og:description" content="本文翻译自 Understanding the Variational Lower Bound, Xitong Yang, September 13, 2017 变分贝叶斯（Variational Bayesian (VB)）是一类非常受欢迎的统计类机器学习方法。VB 非常有用的一个特性是推断优化的二元性：我们可以将统计推断问题（从一个随机变量的值推断出另一种随机变量的值）作为优化问题（找到参变">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://bluefisher.github.io/images/2020-02-06-理解-Variational-Lower-Bound/image-20200206195028885.png">
-<meta property="og:updated_time" content="2020-02-07T08:13:33.094Z">
+<meta property="og:updated_time" content="2020-02-07T15:03:11.873Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="理解 Variational Lower Bound">
-<meta name="twitter:description" content="本文翻译自 Understanding the Variational Lower Bound, Xitong Yang, September 13, 2017 简介 变分贝叶斯（Variational Bayesian (VB)）是一类非常受欢迎的统计类机器学习方法。VB 非常有用的一个特性是推断优化的二元性：我们可以将统计推断问题（从一个随机变量的值推断出另一种随机变量的值）作为优化问题（">
+<meta name="twitter:description" content="本文翻译自 Understanding the Variational Lower Bound, Xitong Yang, September 13, 2017 变分贝叶斯（Variational Bayesian (VB)）是一类非常受欢迎的统计类机器学习方法。VB 非常有用的一个特性是推断优化的二元性：我们可以将统计推断问题（从一个随机变量的值推断出另一种随机变量的值）作为优化问题（找到参变">
 <meta name="twitter:image" content="https://bluefisher.github.io/images/2020-02-06-理解-Variational-Lower-Bound/image-20200206195028885.png">
 
 
@@ -415,7 +415,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2020-02-07 16:13:33" itemprop="dateModified" datetime="2020-02-07T16:13:33+08:00">2020-02-07</time>
+                <time title="修改时间：2020-02-07 23:03:11" itemprop="dateModified" datetime="2020-02-07T23:03:11+08:00">2020-02-07</time>
               
             
           </span>
@@ -478,7 +478,6 @@
 
       
         <p>本文翻译自 <a href="http://users.umiacs.umd.edu/~xyang35/files/understanding-variational-lower.pdf" target="_blank" rel="noopener">Understanding the Variational Lower Bound</a>, Xitong Yang, September 13, 2017</p>
-<h1 id="简介">简介</h1>
 <p>变分贝叶斯（Variational Bayesian (VB)）是一类非常受欢迎的统计类机器学习方法。VB 非常有用的一个特性是推断优化的二元性：我们可以将统计推断问题（从一个随机变量的值推断出另一种随机变量的值）作为优化问题（找到参变量的值来最小化某些目标函数）。另外，<strong>variational lower bound</strong> ，也被称作 <strong>evidence lower bound</strong> (ELBO)，在 VB 的推导中起了非常重要的作用。在这篇文章中，我们主要介绍有关 variational lower bound 的最基础的知识，有助于理解与 “hard attention” 机制有关的论文。</p>
 <a id="more"></a>
 <h1 id="variational-lower-bound">Variational Lower Bound</h1>
@@ -843,7 +842,7 @@ L=\log p(X)-K L[q(Z) \| p(Z | X)]
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#variational-lower-bound"><span class="nav-number">2.</span> <span class="nav-text">Variational Lower Bound</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题设置"><span class="nav-number">2.1.</span> <span class="nav-text">问题设置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第一个推导琴生不等式"><span class="nav-number">2.2.</span> <span class="nav-text">第一个推导：琴生不等式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第二个推导kl-散度"><span class="nav-number">2.3.</span> <span class="nav-text">第二个推导：KL 散度</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#例子"><span class="nav-number">3.</span> <span class="nav-text">例子</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#视觉注意力中的多目标识别问题"><span class="nav-number">3.1.</span> <span class="nav-text">视觉注意力中的多目标识别问题</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#variational-lower-bound"><span class="nav-number">1.</span> <span class="nav-text">Variational Lower Bound</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题设置"><span class="nav-number">1.1.</span> <span class="nav-text">问题设置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第一个推导琴生不等式"><span class="nav-number">1.2.</span> <span class="nav-text">第一个推导：琴生不等式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第二个推导kl-散度"><span class="nav-number">1.3.</span> <span class="nav-text">第二个推导：KL 散度</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#例子"><span class="nav-number">2.</span> <span class="nav-text">例子</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#视觉注意力中的多目标识别问题"><span class="nav-number">2.1.</span> <span class="nav-text">视觉注意力中的多目标识别问题</span></a></li></ol></li></ol></div>
             
 
           </div>

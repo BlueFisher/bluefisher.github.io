@@ -115,7 +115,12 @@
 <meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_Q5dogodt3wzKKktE0v3dMQ@2x.png">
 <meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_83S0T8IEJyudR_I5rI9now@2x.png">
 <meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_9ouOKh2w-b3NNOVx4Mw9bg@2x.png">
-<meta property="og:updated_time" content="2020-02-07T14:54:43.110Z">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_dxlZr07dXNYiTFWL62D7Ag@2x.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_XYyWimolMhPDMg8qCNlcwg@2x.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_1n6HwjwUWbmE9PvCzOVcbw@2x.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_S8CoO3TGtFBpzv8GvmgKeg@2x.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_eRcdr8gczweQHk--1pZF9A@2x.png">
+<meta property="og:updated_time" content="2020-02-08T10:59:58.988Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="理解 Variational Autoencoders (VAEs)">
 <meta name="twitter:description" content="本文翻译自 Understanding Variational Autoencoders (VAEs), Joseph Rocca, Sep 24, 2019 这篇文章里，我们主要介绍一种深度生成模型：Variational Autoencoders (VAEs)。概括地说，VAE 就是一个自动编码器（autoencoder），但它编码后的分布在训练阶段需要被正则化，以此让它的隐空间（laten">
@@ -409,12 +414,24 @@
                 
               
 
-              <time title="创建时间：2020-02-07 17:17:15 / 修改时间：22:54:43" itemprop="dateCreated datePublished" datetime="2020-02-07T17:17:15+08:00">2020-02-07</time>
+              <time title="创建时间：2020-02-07 17:17:15" itemprop="dateCreated datePublished" datetime="2020-02-07T17:17:15+08:00">2020-02-07</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-02-08 18:59:58" itemprop="dateModified" datetime="2020-02-08T18:59:58+08:00">2020-02-08</time>
               
             
           </span>
@@ -554,6 +571,56 @@
 <img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_9ouOKh2w-b3NNOVx4Mw9bg@2x.png" alt="VAE 返回的分布必须是正则化的，以此来确保隐空间有足够好的性质"><figcaption>VAE 返回的分布必须是正则化的，以此来确保隐空间有足够好的性质</figcaption>
 </figure>
 <h1 id="vaes-中的数学">VAEs 中的数学</h1>
+<p>在上一小节中，我们给出了以下直观的理解：VAE 就是将输入 encode 为分布而不是点的 autoencoder，并且通过将 encoder 返回的分布约束为接近标准正态分布而得到正则化的隐空间。 在本小节中，我们将对 VAE 进行更数学化的介绍，这将使我们能够更严格地证明正则化项的合理性。 为此，我们将建立一个概率框架并使用变分推断。</p>
+<h2 id="概率框架及一些假设">概率框架及一些假设</h2>
+<p>首先，定义一个概率图模型来描述我们的数据。 我们用 <span class="math inline">\(x\)</span> 表示我们原始数据的变量，并假定 <span class="math inline">\(x\)</span> 是由未直接观测到的隐变量 <span class="math inline">\(z\)</span>（encoded 后的表征）生成的。 因此，对于每个数据点，假定以下两个步骤的生成过程：</p>
+<ol type="1">
+<li>首先，隐变量 <span class="math inline">\(z\)</span> 是由一个先验 <span class="math inline">\(p(z)\)</span> 采样而来的</li>
+<li>其次，数据 <span class="math inline">\(x\)</span> 是由条件似然分布 <span class="math inline">\(p(x|z)\)</span> 采样而来的</li>
+</ol>
+<p><img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_dxlZr07dXNYiTFWL62D7Ag@2x.png" alt="数据生成过程的图模型" style="zoom:50%;"></p>
+<p>根据这种概率模型，我们可以重新定义 encoder 和 decoder 的概念。 与只考虑确定性 encoder 和 decoder 的简单 autoencoder 相反，我们现在将考虑这两个对象的概率版本。 “概率decoder”由 <span class="math inline">\(p(x|z)\)</span>定义，用来描述给定 encoded 变量的 decoded 变量的分布，而 “概率encoded”由 <span class="math inline">\(p(z|x)\)</span> 定义，用来描述给定 decoded 变量的 encoded 变量的分布。</p>
+<p>至此，我们已经可以注意到，在简单的 autoencoder 中所缺少的隐空间正则化出现在数据生成过程的定义中：隐空间中的 encoded 表征 <span class="math inline">\(z\)</span> 实际上被假定遵循先验分布 <span class="math inline">\(p(z)\)</span>。 另外，我们还可以回想一下著名的贝叶斯定理，先验 <span class="math inline">\(p(z)\)</span>，似然 <span class="math inline">\(p(x|z)\)</span> 和后验 <span class="math inline">\(p(z|x)\)</span> 之间的联系。 <span class="math display">\[
+p(z | x)=\frac{p(x | z) p(z)}{p(x)}=\frac{p(x | z) p(z)}{\int p(x | u) p(u) d u}
+\]</span> 现在假设 <span class="math inline">\(p(z)\)</span> 是标准高斯分布，<span class="math inline">\(p(x|z)\)</span> 也是一个高斯分布，且它的均值由一个确定性函数 <span class="math inline">\(f(z)\)</span> 定义，协方差矩阵是某一个常量 <span class="math inline">\(c\)</span> 乘以单位矩阵 <span class="math inline">\(I\)</span> 而来。函数 <span class="math inline">\(f\)</span> 暂且是一堆函数 <span class="math inline">\(F\)</span> 中的一个，我们稍后再去选择这个函数。现在我们有 <span class="math display">\[
+\begin{array}{l}{p(z)=\mathcal{N}(0, I)} \\ {p(x | z) \equiv \mathcal{N}(f(z), c I) \quad f \in F \quad c&gt;0}\end{array}
+\]</span> 现在，假设 <span class="math inline">\(f\)</span> 已经是最优了且固定了下来，那么理论上因为我们知道了 <span class="math inline">\(p(z)\)</span> 和 <span class="math inline">\(p(x|z)\)</span> ，就可以使用贝叶斯理论来计算 <span class="math inline">\(p(z|x)\)</span> ，也就是经典的贝叶斯推理问题。但是，这种贝叶斯计算一般是很困难，无法完成的（因为分母的积分没有办法计算），所以需要一种近似的方法比如变分推断 variational inference。</p>
+<h2 id="变分推断公式">变分推断公式</h2>
+<p>在统计学中，变分推断（VI）就是用来近似复杂分布的一种方法。这个想法就是要使用一个参数化的分布族（例如高斯族，其参数是均值和协方差），在该族中寻找目标分布的最佳近似值。 该族中最好的元素是使给定的近似误差（在大多数情况下，近似与目标之间的 KL 散度）最小的一种元素，并通过梯度下降来求得该参数。</p>
+<p>现在我们用一个高斯分布 <span class="math inline">\(q_x(z)\)</span> 来近似 <span class="math inline">\(p(z|x)\)</span> 。它的均值与方差由函数 <span class="math inline">\(g\)</span> 和 <span class="math inline">\(h\)</span> 定义，这两个函数均是 <span class="math inline">\(x\)</span> 的函数。同时这两个函数分别属于函数族 <span class="math inline">\(G\)</span> 和 <span class="math inline">\(H\)</span>。 <span class="math display">\[
+q_{x}(z) \equiv \mathcal{N}(g(x), h(x)) \quad g \in G \quad h \in H
+\]</span> 那么现在我们已经定义了一族要进行变分推断的近似函数，并且要在这些函数中通过优化 <span class="math inline">\(f\)</span> 和 <span class="math inline">\(h\)</span> 来找到最优的近似函数（其实就是优化 <span class="math inline">\(f\)</span> 和 <span class="math inline">\(h\)</span> 的参数），这个优化就是要最小化近似分布与目标分布 <span class="math inline">\(p(z|x)\)</span> 之间的 KL 散度。换句话说，我们要找到最优的 <span class="math inline">\(g^*\)</span> 与 <span class="math inline">\(f^*\)</span> 以满足： <span class="math display">\[
+\begin{aligned}\left(g^{*}, h^{*}\right) &amp;=\underset{(g, h) \in G \times H}{\arg \min } K L\left(q_{x}(z), p(z | x)\right) \\ 
+&amp;=\underset{(g, h) \in G \times H}{\arg \min }\left(\mathbb{E}_{z \sim q_{x}}\left(\log q_{x}(z)\right)-\mathbb{E}_{z \sim q_{x}}\left(\log \frac{p(x | z) p(z)}{p(x)}\right)\right) \\ 
+&amp;=\underset{(g, h) \in G \times H}{\arg \min }\left(\mathbb{E}_{z \sim q_{x}}\left(\log q_{x}(z)\right)-\mathbb{E}_{z \sim q_{x}}(\log p(z))-\mathbb{E}_{z \sim q_{x}}(\log p(x | z))+\mathbb{E}_{z \sim q_{x}}(\log p(x))\right) \\ 
+&amp;=\underset{(g, h) \in G \times H}{\arg \max }\left(\mathbb{E}_{z \sim q_{x}}(\log p(x | z))-K L\left(q_{x}(z), p(z)\right)\right) \\ 
+&amp;=\underset{(g, h) \in G \times H}{\arg \max }\left(\mathbb{E}_{z \sim q_{x}}\left(-\frac{\|x-f(z)\|^{2}}{2 c}\right)-K L\left(q_{x}(z), p(z)\right)\right) \end{aligned}
+\]</span> 在倒数第二个式子中，即在估计后验 <span class="math inline">\(p(z|x)\)</span> 的过程中，我们可以看到一种权衡：既要最大化初始观测数据的似然（第一项，最大化期望 log-likelihood），又要更靠近先验分布（第二项，最小化 <span class="math inline">\(q_x(z)\)</span> 与 <span class="math inline">\(p(z)\)</span> 之间的 KL 散度）。这种权衡在贝叶斯推断问题中很自然，并且表达了我们想要找到在初始数据的置信度与先验的置信度之间的平衡。</p>
+<p>到目前为止，我们假设函数 <span class="math inline">\(f\)</span> 是已知并且是固定的，并且在这种假设下我们可以使用变分推断的方法来近似后验 <span class="math inline">\(p(z|x)\)</span> 。但在实际操作中，这个函数 <span class="math inline">\(f\)</span> ，也就是定义了 decoder 的函数是不可知的，也同样的需要在一堆函数族中进行选择。为此，让我们回想一下我们的最初目标就是要去找到一个性能良好的 encoding-decoding 方案，且该方案的隐空间是正则化的，并足够正则化来生成新数据。如果正则性主要是由先验分布所决定的，那么整个 encoding-decoding 的性能主要取决于函数 <span class="math inline">\(f\)</span> 的选择。也的确，由于 <span class="math inline">\(p(z|x)\)</span> 可以由 <span class="math inline">\(p(z)\)</span> 和 <span class="math inline">\(p(x|z)\)</span> 近似（用变分推断）而来且 <span class="math inline">\(p(z)\)</span> 是一个简单的标准高斯分布，因此在我们的模型中需要优化的只有两个：参数 <span class="math inline">\(c\)</span> ，控制着似然的方差，和函数 <span class="math inline">\(f\)</span> ，控制着似然的均值。</p>
+<p>我们之前也提到过，我们可以从 <span class="math inline">\(F\)</span> 中选择去任意的 <span class="math inline">\(f\)</span> 来得到 <span class="math inline">\(p(z|x)\)</span> 的最佳近似 <span class="math inline">\(q^*_x(z)\)</span> 。如果不管它的概率属性，我们想要做的就是让 encoding-decoding 性能越高越好，那么我们更想要去选择能最大化在给定 <span class="math inline">\(z\)</span> 下（<span class="math inline">\(z\)</span> 从 <span class="math inline">\(q^*_x(z)\)</span> 采样而来）的 <span class="math inline">\(x\)</span> 的期望 log-likelihood 的那些 <span class="math inline">\(f\)</span> 。<strong>也就是说，对于一个给定的输入 <span class="math inline">\(x\)</span> ，当我们从 <span class="math inline">\(q^*_x(z)\)</span> 采样 <span class="math inline">\(z\)</span> ，又从 <span class="math inline">\(p(x|z)\)</span> 采样得到 <span class="math inline">\(\hat{x}\)</span> 时，我们想要去最大化 <span class="math inline">\(\hat{x}=x\)</span> 的概率</strong>。因此，我们想要找到的 <span class="math inline">\(f^*\)</span> 满足： <span class="math display">\[
+\begin{aligned} f^{*} &amp;=\underset{f \in F}{\arg \max } \mathbb{E}_{z \sim q_{x}^{*}}(\log p(x | z)) \\ &amp;=\underset{f \in F}{\arg \max } \mathbb{E}_{z \sim q_{x}^{*}}\left(-\frac{\|x-f(z)\|^{2}}{2 c}\right) \end{aligned}
+\]</span> 其中函数 <span class="math inline">\(f\)</span> 决定了 <span class="math inline">\(q^*_x(z)\)</span>。将上面这些都联系起来，我们其实就是要去找最优 <span class="math inline">\(f^*,g^*,h^*\)</span>，使： <span class="math display">\[
+\left(f^{*}, g^{*}, h^{*}\right)=\underset{(f, g, h) \in F \times G \times H}{\arg \max }\left(\mathbb{E}_{z \sim q_{x}}\left(-\frac{\|x-f(z)\|^{2}}{2 c}\right)-K L\left(q_{x}(z), p(z)\right)\right)
+\]</span> 我们可以将这个目标函数与之前介绍的 VAEs 的直观理解联系起来：第一项是 <span class="math inline">\(x\)</span> 与 <span class="math inline">\(f(z)\)</span> 之间的重构误差，第二项是 <span class="math inline">\(q_x(z)\)</span> 与 <span class="math inline">\(p(z)\)</span> （也就是标准高斯）之间的 KL 散度。我们也可以注意到常量 <span class="math inline">\(c\)</span> 平衡着这两项：<span class="math inline">\(c\)</span> 越大，模型中的概率 decoder <span class="math inline">\(f(z)\)</span> 周围的方差就越大，也因此我们更倾向正则化项。若 <span class="math inline">\(c\)</span> 小，则相反。</p>
+<h2 id="引入神经网络">引入神经网络</h2>
+<p>至此，我们建立了一个依赖于三个函数 <span class="math inline">\(f,g,h\)</span> 的概率模型，并用变分推断的方法解释了优化问题来得到最优 <span class="math inline">\(f^*,g^*,h^*\)</span> 。由于我们没有办法遍历整个函数族，所以我们要限制优化的范围，并用神经网络来表达 <span class="math inline">\(f,g,h\)</span> 。</p>
+<p>在实际中，<span class="math inline">\(g\)</span> 和 <span class="math inline">\(h\)</span> 不会被分开形成两个独立的网络，而是共享一部分的权重： <span class="math display">\[
+g(x)=g_{2}\left(g_{1}(x)\right) \quad h(x)=h_{2}\left(h_{1}(x)\right) \quad g_{1}(x)=h_{1}(x)
+\]</span> 我们在 <span class="math inline">\(q_x(z)\)</span> 的协方差矩阵中定义过，<span class="math inline">\(h(x)\)</span> 应该是一个方阵。但为了简单起见，我们假设 <span class="math inline">\(p(z|x)\)</span> 的近似 <span class="math inline">\(q_x(z)\)</span> 是一个对角协方差矩阵的多维正态分布。在这个假设下 <span class="math inline">\(h(x)\)</span> 就是一个简单的向量，代表协方差矩阵的对角线，并且长度与 <span class="math inline">\(g(x)\)</span> 相同，当然这会降低近似 <span class="math inline">\(p(z|x)\)</span> 的准确性。</p>
+<figure>
+<img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_XYyWimolMhPDMg8qCNlcwg@2x.png" alt="VAE 的 encoder 部分"><figcaption>VAE 的 encoder 部分</figcaption>
+</figure>
+<p>与 encoder 部分相反，我们假设 <span class="math inline">\(p(x|z)\)</span> 是一个有着固定方差的高斯分布。函数关于 <span class="math inline">\(z\)</span> 的函数 <span class="math inline">\(f\)</span> 定义了这个高斯分布的均值，同时也用一个神经网络来表示：</p>
+<figure>
+<img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_1n6HwjwUWbmE9PvCzOVcbw@2x.png" alt="VAE 的 decoder 部分"><figcaption>VAE 的 decoder 部分</figcaption>
+</figure>
+<p>然后把 encoder 和 decoder 两部分串联起来就可以组成 VAE 的整体架构了。但在训练过程中，我们必须注意从 encoder 返回的分布中采样的方式，因为采样的过程必须允许误差通过网络反向传播。尽管是在整个架构的一半进行随机采样，但有一个重参数技巧让梯度下降成为可能。因为 <span class="math inline">\(z\)</span> 是遵循均值为 <span class="math inline">\(g(x)\)</span> 方差为 <span class="math inline">\(h(x)\)</span> 的高斯分布，它也可以被表示为： <span class="math display">\[
+z=h(x) \zeta+g(x) \quad \zeta \sim \mathcal{N}(0, I)
+\]</span> <img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_S8CoO3TGtFBpzv8GvmgKeg@2x.png" alt="重参数技巧"></p>
+<p>最终，VAE 架构的目标函数可以由前面小节给出，其中，理论上期望可以用蒙特卡洛来估计。我们定义 <span class="math inline">\(C=1/(2c)\)</span> ，那么损失函数即为一个重构项，一个正则化项还有一个常数来定义这两项的权重。</p>
+<figure>
+<img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_eRcdr8gczweQHk--1pZF9A@2x.png" alt="Varitional Autoencoders"><figcaption>Varitional Autoencoders</figcaption>
+</figure>
 
       
     </div>
@@ -867,7 +934,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#降维pca-与-autoencoders"><span class="nav-number">1.</span> <span class="nav-text">降维，PCA 与 autoencoders</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是降维"><span class="nav-number">1.1.</span> <span class="nav-text">什么是降维？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#principal-components-analysis-pca"><span class="nav-number">1.2.</span> <span class="nav-text">Principal components analysis (PCA)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#autoencoders"><span class="nav-number">1.3.</span> <span class="nav-text">Autoencoders</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#variational-autoencoders"><span class="nav-number">2.</span> <span class="nav-text">Variational Autoencoders</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#autoencoders-在样本生成中的限制"><span class="nav-number">2.1.</span> <span class="nav-text">Autoencoders 在样本生成中的限制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#variational-autoencoders-的定义"><span class="nav-number">2.2.</span> <span class="nav-text">variational autoencoders 的定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#正则化的直观理解"><span class="nav-number">2.3.</span> <span class="nav-text">正则化的直观理解</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#vaes-中的数学"><span class="nav-number">3.</span> <span class="nav-text">VAEs 中的数学</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#降维pca-与-autoencoders"><span class="nav-number">1.</span> <span class="nav-text">降维，PCA 与 autoencoders</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是降维"><span class="nav-number">1.1.</span> <span class="nav-text">什么是降维？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#principal-components-analysis-pca"><span class="nav-number">1.2.</span> <span class="nav-text">Principal components analysis (PCA)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#autoencoders"><span class="nav-number">1.3.</span> <span class="nav-text">Autoencoders</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#variational-autoencoders"><span class="nav-number">2.</span> <span class="nav-text">Variational Autoencoders</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#autoencoders-在样本生成中的限制"><span class="nav-number">2.1.</span> <span class="nav-text">Autoencoders 在样本生成中的限制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#variational-autoencoders-的定义"><span class="nav-number">2.2.</span> <span class="nav-text">variational autoencoders 的定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#正则化的直观理解"><span class="nav-number">2.3.</span> <span class="nav-text">正则化的直观理解</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#vaes-中的数学"><span class="nav-number">3.</span> <span class="nav-text">VAEs 中的数学</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#概率框架及一些假设"><span class="nav-number">3.1.</span> <span class="nav-text">概率框架及一些假设</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#变分推断公式"><span class="nav-number">3.2.</span> <span class="nav-text">变分推断公式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#引入神经网络"><span class="nav-number">3.3.</span> <span class="nav-text">引入神经网络</span></a></li></ol></li></ol></div>
             
 
           </div>
