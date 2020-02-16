@@ -105,7 +105,7 @@
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://bluefisher.github.io/images/2020-02-16-Natural-Gradient-Descent/param_space_dist.png">
 <meta property="og:image" content="https://bluefisher.github.io/images/2020-02-16-Natural-Gradient-Descent/param_space_dist2.png">
-<meta property="og:updated_time" content="2020-02-16T13:12:33.457Z">
+<meta property="og:updated_time" content="2020-02-16T14:08:39.834Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Natural Gradient Descent">
 <meta name="twitter:description" content="本文翻译自 Natural Gradient Descent, Agustinus Kristiadi. 假设我们现在有一个概率模型 \(p(x|\theta)\) ，我们希望通过最大化似然函数来找到最优的参数 \(\theta\)，也就是最小化损失函数 \(\mathcal{L}(\theta)\) ，即负的似然函数。 一般用来解决优化问题的方法是使用梯度下降法，我们根据 \(-\nabla">
@@ -399,7 +399,7 @@
                 
               
 
-              <time title="创建时间：2020-02-16 20:08:26 / 修改时间：21:12:33" itemprop="dateCreated datePublished" datetime="2020-02-16T20:08:26+08:00">2020-02-16</time>
+              <time title="创建时间：2020-02-16 20:08:26 / 修改时间：22:08:39" itemprop="dateCreated datePublished" datetime="2020-02-16T20:08:26+08:00">2020-02-16</time>
             
 
             
@@ -506,6 +506,23 @@ f(\theta&#39;) \approx f(\theta) + (\theta&#39;-\theta)^T\nabla f(\theta) + \fra
 \begin{align}
     \text{KL}[p(x \vert \theta) \, \Vert \, p(x \vert \theta + d)] &amp;\approx \frac{1}{2} d^\text{T} \text{F} d \, .
 \end{align}
+\]</span> 现在我们想知道在分布空间中，什么向量 <span class="math inline">\(d\)</span> 可以最小化损失 <span class="math inline">\(\mathcal{L}(\theta)\)</span> ，并且这个方向能让 KL 散度最小。也就是说我们要最小化： <span class="math display">\[
+d^* = \mathcal{L} (\theta + d) \quad \text{ s.t. } \text{KL}[p_\theta \Vert p_{\theta + d}] = c
+\]</span> 其中 <span class="math inline">\(c\)</span> 为常数。将 KL 散度固定为某个常数的目的是确保无论曲率如何，我们都以恒定的速度沿空间移动。 进一步的好处是，这使算法对模型的重参数化更加健壮，即算法不在乎如何对模型进行参数化，它只在乎分布。</p>
+<p>我们将上述最小化写成拉格朗日的形式，并将 <span class="math inline">\(\mathcal{L} (\theta + d)\)</span> 泰勒一介近似，我们可以得到： <span class="math display">\[
+\begin{align}
+d^* &amp;= \mathop{\text{arg min}}_d \, \mathcal{L} (\theta + d) + \lambda \, (\text{KL}[p_\theta \Vert p_{\theta + d}] - c) \\
+    &amp;\approx \mathop{\text{arg min}}_d \, \mathcal{L}(\theta) + \nabla_\theta \mathcal{L}(\theta)^\text{T} d + \frac{1}{2} \lambda \, d^\text{T} \text{F} d - \lambda c \, .
+\end{align}
+\]</span> 我们对 <span class="math inline">\(d\)</span> 求导等于 0： <span class="math display">\[
+\begin{align}
+0 &amp;= \frac{\partial}{\partial d} \mathcal{L}(\theta) + \nabla_\theta \mathcal{L}(\theta)^\text{T} d + \frac{1}{2} \lambda \, d^\text{T} \text{F} d - \lambda c \\[5pt]
+    &amp;= \nabla_\theta \mathcal{L}(\theta) + \lambda \, \text{F} d \\[5pt]
+    \lambda \, \text{F} d &amp;= -\nabla_\theta \mathcal{L}(\theta) \\[5pt]
+    d &amp;= -\frac{1}{\lambda} \text{F}^{-1} \nabla_\theta \mathcal{L}(\theta) \\[5pt]
+\end{align}
+\]</span> 这样我们就可以得到最优下降的方向，也就是考虑了分布空间中局部曲率的梯度的反方向。我们将常量因子放入到学习率中去，则自然梯度可以被定义为： <span class="math display">\[
+\tilde{\nabla}_\theta \mathcal{L}(\theta) = \text{F}^{-1} \nabla_\theta \mathcal{L}(\theta) \, .
 \]</span></p>
 
       
