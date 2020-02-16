@@ -95,29 +95,28 @@
 
 
 
-  <meta name="description" content="论文 Deep Reinforcement Learning In Parameterized Action Space 将 Deep Deterministic Policy Gradient 算法扩展了一下，使 DDPG 可以处理连续的参数化的行为空间 (parameterized action space) 。论文以机器人世界杯 (RoboCup) 的 2D 游戏 Half-Field-Of">
-<meta name="keywords" content="RL">
+  <meta name="description" content="本文翻译自 Natural Gradient Descent, Agustinus Kristiadi. 假设我们现在有一个概率模型 \(p(x|\theta)\) ，我们希望通过最大化似然函数来找到最优的参数 \(\theta\)，也就是最小化损失函数 \(\mathcal{L}(\theta)\) ，即负的似然函数。 一般用来解决优化问题的方法是使用梯度下降法，我们根据 \(-\nabla">
+<meta name="keywords" content="Fisher, Fisher Chang, 张朕煜, zhangzhenyu, zhenyuzhang">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Deep Reinforcement Learning In Parameterized Action Space">
-<meta property="og:url" content="https://bluefisher.github.io/2018/07/18/Deep-Reinforcement-Learning-In-Parameterized-Action-Space/index.html">
+<meta property="og:title" content="Natural Gradient Descent">
+<meta property="og:url" content="https://bluefisher.github.io/2020/02/16/Natural-Gradient-Descent/index.html">
 <meta property="og:site_name" content="Fisher&#39;s Blog">
-<meta property="og:description" content="论文 Deep Reinforcement Learning In Parameterized Action Space 将 Deep Deterministic Policy Gradient 算法扩展了一下，使 DDPG 可以处理连续的参数化的行为空间 (parameterized action space) 。论文以机器人世界杯 (RoboCup) 的 2D 游戏 Half-Field-Of">
+<meta property="og:description" content="本文翻译自 Natural Gradient Descent, Agustinus Kristiadi. 假设我们现在有一个概率模型 \(p(x|\theta)\) ，我们希望通过最大化似然函数来找到最优的参数 \(\theta\)，也就是最小化损失函数 \(\mathcal{L}(\theta)\) ，即负的似然函数。 一般用来解决优化问题的方法是使用梯度下降法，我们根据 \(-\nabla">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https://bluefisher.github.io/images/2018-11-13-Deep-Reinforcement-Learning-In-Parameterized-Action-Space/P1GPS0.png">
-<meta property="og:image" content="https://bluefisher.github.io/images/2018-11-13-Deep-Reinforcement-Learning-In-Parameterized-Action-Space/P1YlZD.png">
-<meta property="og:image" content="https://bluefisher.github.io/images/2018-11-13-Deep-Reinforcement-Learning-In-Parameterized-Action-Space/P10J76.png">
-<meta property="og:updated_time" content="2018-12-31T01:15:30.652Z">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-16-Natural-Gradient-Descent/param_space_dist.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-16-Natural-Gradient-Descent/param_space_dist2.png">
+<meta property="og:updated_time" content="2020-02-16T13:12:33.457Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Deep Reinforcement Learning In Parameterized Action Space">
-<meta name="twitter:description" content="论文 Deep Reinforcement Learning In Parameterized Action Space 将 Deep Deterministic Policy Gradient 算法扩展了一下，使 DDPG 可以处理连续的参数化的行为空间 (parameterized action space) 。论文以机器人世界杯 (RoboCup) 的 2D 游戏 Half-Field-Of">
-<meta name="twitter:image" content="https://bluefisher.github.io/images/2018-11-13-Deep-Reinforcement-Learning-In-Parameterized-Action-Space/P1GPS0.png">
+<meta name="twitter:title" content="Natural Gradient Descent">
+<meta name="twitter:description" content="本文翻译自 Natural Gradient Descent, Agustinus Kristiadi. 假设我们现在有一个概率模型 \(p(x|\theta)\) ，我们希望通过最大化似然函数来找到最优的参数 \(\theta\)，也就是最小化损失函数 \(\mathcal{L}(\theta)\) ，即负的似然函数。 一般用来解决优化问题的方法是使用梯度下降法，我们根据 \(-\nabla">
+<meta name="twitter:image" content="https://bluefisher.github.io/images/2020-02-16-Natural-Gradient-Descent/param_space_dist.png">
 
 
 
 
 
 
-  <link rel="canonical" href="https://bluefisher.github.io/2018/07/18/Deep-Reinforcement-Learning-In-Parameterized-Action-Space/">
+  <link rel="canonical" href="https://bluefisher.github.io/2020/02/16/Natural-Gradient-Descent/">
 
 
 
@@ -127,7 +126,7 @@
   };
 </script>
 
-  <title>Deep Reinforcement Learning In Parameterized Action Space | Fisher's Blog</title>
+  <title>Natural Gradient Descent | Fisher's Blog</title>
   
 
 
@@ -357,7 +356,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2018/07/18/Deep-Reinforcement-Learning-In-Parameterized-Action-Space/">
+    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2020/02/16/Natural-Gradient-Descent/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Fisher Chang">
@@ -374,7 +373,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">Deep Reinforcement Learning In Parameterized Action Space
+          <h2 class="post-title" itemprop="name headline">Natural Gradient Descent
 
               
             
@@ -400,46 +399,16 @@
                 
               
 
-              <time title="创建时间：2018-07-18 16:53:21" itemprop="dateCreated datePublished" datetime="2018-07-18T16:53:21+08:00">2018-07-18</time>
+              <time title="创建时间：2020-02-16 20:08:26 / 修改时间：21:12:33" itemprop="dateCreated datePublished" datetime="2020-02-16T20:08:26+08:00">2020-02-16</time>
             
 
             
               
 
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2018-12-31 09:15:30" itemprop="dateModified" datetime="2018-12-31T09:15:30+08:00">2018-12-31</time>
               
             
           </span>
 
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Reinforcement-Learning/" itemprop="url" rel="index"><span itemprop="name">Reinforcement Learning</span></a></span>
-
-                
-                
-              
-            </span>
           
 
           
@@ -449,9 +418,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/07/18/Deep-Reinforcement-Learning-In-Parameterized-Action-Space/#comments" itemprop="discussionUrl">
+                <a href="/2020/02/16/Natural-Gradient-Descent/#comments" itemprop="discussionUrl">
                 
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2018/07/18/Deep-Reinforcement-Learning-In-Parameterized-Action-Space/" itemprop="commentCount"></span>
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2020/02/16/Natural-Gradient-Descent/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -479,74 +448,65 @@
       
 
       
-        <p>论文 Deep Reinforcement Learning In Parameterized Action Space 将 <a href="https://bluefisher.github.io/2018/05/16/Deep-Deterministic-Policy-Gradient/">Deep Deterministic Policy Gradient</a> 算法扩展了一下，使 DDPG 可以处理连续的参数化的行为空间 (parameterized action space) 。论文以机器人世界杯 (RoboCup) 的 2D 游戏 Half-Field-Offense (HFO) 为例，构造了深度神经网络并进行训练。</p>
+        <p>本文翻译自 <a href="https://wiseodd.github.io/techblog/2018/03/14/natural-gradient/" target="_blank" rel="noopener">Natural Gradient Descent</a>, <a href="https://wiseodd.github.io/" target="_blank" rel="noopener">Agustinus Kristiadi</a>.</p>
+<p>假设我们现在有一个概率模型 <span class="math inline">\(p(x|\theta)\)</span> ，我们希望通过最大化似然函数来找到最优的参数 <span class="math inline">\(\theta\)</span>，也就是最小化损失函数 <span class="math inline">\(\mathcal{L}(\theta)\)</span> ，即负的似然函数。 一般用来解决优化问题的方法是使用梯度下降法，我们根据 <span class="math inline">\(-\nabla \mathcal{L}(\theta)\)</span> 的方向来使参数向前走一步，这个方向是 <span class="math inline">\(\theta\)</span> 在参数空间中最陡峭的方向。可以用如下公式表示： <span class="math display">\[
+\frac{-\nabla_\theta \mathcal{L}(\theta)}{\lVert \nabla_\theta \mathcal{L}(\theta) \rVert} = \lim_{\epsilon \to 0} \frac{1}{\epsilon} \mathop{\text{arg min}}_{\text{ s.t. } \lVert d \rVert \leq \epsilon} \mathcal{L}(\theta + d) \, .
+\]</span> 意思就是要去选取一个向量 <span class="math inline">\(d\)</span> ，使得新参数 <span class="math inline">\(\theta +d\)</span> 在参数 <span class="math inline">\(\theta\)</span> 的距离为 <span class="math inline">\(\epsilon\)</span> 的范围内，并能最小化损失。注意我们在描述这个范围的时候用的是欧几里得范数，因此梯度下降取决于参数空间（parameter space）的欧几里得几何。</p>
+<p>但如果我们的目标是使损失函数最小（使似然性最大化），那么很自然地，我们会在所有可能的似然性空间中让参数向前走一步。 由于似然函数本身是概率分布，因此我们可以将其称为分布空间（distribution space） 。 因此，在该分布空间而不是参数空间中采用最陡的下降方向是有意义的。</p>
+<p>那么我们应该在该空间中使用哪个度量/距离呢？一个流行的选择是 KL 散度。</p>
 <a id="more"></a>
-<h1 id="hfo-介绍">HFO 介绍</h1>
-<p>简单介绍一下 HFO 游戏的状态、行为空间与我们自定义的奖励函数。</p>
-<h2 id="状态空间">状态空间</h2>
-<p><img src="/images/2018-11-13-Deep-Reinforcement-Learning-In-Parameterized-Action-Space/P1GPS0.png"></p>
-<p>如图所示，我们的 agent 就是这足球上的球员，有着 58 个连续的特征值来表示状态空间，比如该 agent 距球的距离、角球区的距离、禁区角的距离，或者当前的比分，其他球员的信息等等。</p>
-<h2 id="行为空间">行为空间</h2>
-<p>一个 agent 可以产生四种行为：加速 (Dash) 、转向 (Turn) 、铲球 (Tackle) 和踢球 (Kick) ，每一个行为又有着一道两种连续的参数来控制：</p>
-<ul>
-<li><em>Dash</em> (power, direction) ：加速的力度 (power) 在 <span class="math inline">\([0,100]\)</span> 范围内</li>
-<li><em>Turn</em> (direction)</li>
-<li><em>Tackle</em> (direction)</li>
-<li><em>Kick</em> (power, direction) ：踢球的力度 (power) 在 <span class="math inline">\([0,100]\)</span> 范围内</li>
-</ul>
-<p>所有行为的方向参数在 <span class="math inline">\([-180,180]\)</span> 角度范围内。</p>
-<h3 id="奖励函数">奖励函数</h3>
-<p>理论上，真正的奖励应该是球员进球，但如果就这么一个奖励信息，对于 agent 来说太稀少了，所以我们手动设计奖励函数。一共有两部分组成：</p>
-<ul>
-<li>agent 移动到球附近的奖励 (Move To Ball Reward) ：用 <span class="math inline">\(d(a,b)\)</span> 表示 agent 与 球 (ball) 的距离，<span class="math inline">\(\mathbb{I}^{kick}\)</span> 表示 agent 是否离球足够近可以踢球，如果是则为 1</li>
-<li>agent 朝球门踢球后的奖励 (Kick To Goal Reward) ：用 <span class="math inline">\(d(b,g)\)</span> 表示球与球门的距离，<span class="math inline">\(\mathbb{I}^{goal}\)</span> 表示踢球之后球是否进门得分，如果是则为 1</li>
-</ul>
-<p>有了以上的设计，我们最终的奖励函数为： <span class="math display">\[
-r_t = d_{t-1}(a,b)-d_t(a,b) + \mathbb{I}_t^{kick} + 3\big(d_{t-1}(b,g)-d_t(b,g)\big) +5\mathbb{I}_t^{goal}
+<p>从下图可以看出在参数空间中仅使用欧几里得距离会出现问题。考虑两个高斯分布，变量只为均值，方差固定为 2 和 0.5。</p>
+<p><img src="/images/2020-02-16-Natural-Gradient-Descent/param_space_dist.png"></p>
+<p><img src="/images/2020-02-16-Natural-Gradient-Descent/param_space_dist2.png"></p>
+<p>在这两张图中，两个高斯的距离是相同的，根据欧几里德距离也就是 4 （红线），但在分布空间中，也就是说我们考虑一下这两个高斯的形状，这两张图中的高斯距离是不一样的。第一幅的 KL 散度会更小一点因为两个高斯有更多的重叠。因此如果我们只考虑参数空间那么会遗漏分布之间的信息。</p>
+<h1 id="fisher-and-kl-divergence">Fisher and KL-divergence</h1>
+<p>Fisher 信息矩阵（Fisher Information Matrix）定义了以 KL 散度为度量标准的分布空间中的局部曲率。</p>
+<p><em>定理：Fisher 信息矩阵（FIM）是关于 <span class="math inline">\(\theta&#39;\)</span> ，在 <span class="math inline">\(\theta=\theta&#39;\)</span>处， 两个分布 <span class="math inline">\(p(x|\theta)\)</span> 与 <span class="math inline">\(p(x|\theta&#39;)\)</span> 的 KL 散度的 Hessian 矩阵。</em></p>
+<p>证明：KL 散度可以拆分为熵和交叉熵两部分： <span class="math display">\[
+\text{KL} [p(x \vert \theta) \, \Vert \, p(x \vert \theta&#39;)] = \mathbb{E}_{p(x \vert \theta)} [ \log p(x \vert \theta) ] - \mathbb{E}_{p(x \vert \theta)} [ \log p(x \vert \theta&#39;) ] \, .
+\]</span> 关于 <span class="math inline">\(\theta&#39;\)</span> 的一阶导为： <span class="math display">\[
+\begin{align}
+    \nabla_{\theta&#39;} \text{KL}[p(x \vert \theta) \, \Vert \, p(x \vert  \theta&#39;)] &amp;= \nabla_{\theta&#39;} \mathbb{E}_{p(x \vert \theta)} [ \log p(x \vert \theta) ] - \nabla_{\theta&#39;} \mathbb{E}_{p(x \vert \theta)} [ \log p(x \vert \theta&#39;) ] \\[5pt]
+        &amp;= - \mathbb{E}_{p(x \vert \theta)} [ \nabla_{\theta&#39;} \log p(x \vert \theta&#39;) ] \\[5pt]
+        &amp;= - \int p(x \vert \theta) \nabla_{\theta&#39;} \log p(x \vert \theta&#39;) \, \text{d}x \, .
+\end{align}
+\]</span> 二阶导为： <span class="math display">\[
+\begin{align}
+    \nabla_{\theta&#39;}^2 \, \text{KL}[p(x \vert \theta) \, \Vert \, p(x \vert \theta&#39;)] &amp;= - \int p(x \vert \theta) \, \nabla_{\theta&#39;}^2 \log p(x \vert \theta&#39;) \, \text{d}x \\[5pt]
+\end{align}
+\]</span> 那么关于 <span class="math inline">\(\theta&#39;\)</span> ，在 <span class="math inline">\(\theta=\theta&#39;\)</span>处的 Hessian 为： <span class="math display">\[
+\begin{align}
+    \text{H}_{\text{KL}[p(x \vert \theta) \, \Vert \, p(x \vert \theta&#39;)]} &amp;= - \int p(x \vert \theta) \, \left. \nabla_{\theta&#39;}^2 \log p(x \vert \theta&#39;) \right\vert_{\theta&#39; = \theta} \, \text{d}x \\[5pt]
+        &amp;= - \int p(x \vert \theta) \, \text{H}_{\log p(x \vert \theta)} \, \text{d}x \\[5pt]
+        &amp;= - \mathbb{E}_{p(x \vert \theta)} [\text{H}_{\log p(x \vert \theta)}] \\[5pt]
+        &amp;= \text{F} \, .
+\end{align}
 \]</span></p>
-<h1 id="参数化行为空间的架构-parameterized-action-space-architecture">参数化行为空间的架构 Parameterized Action Space Architecture</h1>
-<p>假设我们有一系列的离散的行为 <span class="math inline">\(A_d=\{a_1,a_2,\cdots,a_k\}\)</span> ，其中每一个行为 <span class="math inline">\(a\in A_d\)</span> 由 <span class="math inline">\(m_a\)</span> 个连续参数 <span class="math inline">\(\{p_1^a,p_2^a,\cdots,p_{m_a}^a\} \in \mathbb{R}^{m_a}\)</span> 的特征向量构成，那么一个行为可以用元组的形式表示： <span class="math inline">\((a,p_1^a,p_2^a,\cdots,p_{m_a}^a)\)</span> ，因此行为空间可以写为： <span class="math inline">\(A=\cup_{a\in A_d}(a,p_1^a,p_2^a,\cdots,p_{m_a}^a)\)</span></p>
-<p>在 HFO 游戏中，参数化的行为空间为： <span class="math inline">\(A=(Dash,p_1^{dash},p_2^{dash})\cup(Turn,p_3^{turn})\cup(Tackle,p_4^{tackle})\cup(Kick,p_5^{kick},p_6^{kick})\)</span></p>
-<h2 id="神经网络架构">神经网络架构</h2>
-<p><img src="/images/2018-11-13-Deep-Reinforcement-Learning-In-Parameterized-Action-Space/P1YlZD.png"></p>
-<p>如图，我们用 DDPG 的 actor-critic 形式，其中 actor 与 critic 的隐藏层架构相同。actor 网络的输入为状态向量，输出为行为向量，以前四个为离散的行为 <span class="math inline">\((Dash,Trun,Tackle,Kick)\)</span> ，后六个为每个行为对应的参数 <span class="math inline">\((p_1^{dash},p_2^{dash},p_3^{turn},p_4^{tackle},p_5^{kick},p_6^{kick})\)</span> 组成。critic 的输入为状态向量与 actor 所输出的行为向量结合而成的向量，输出则为状态行为价值函数。</p>
-<p>按照 DDPG 算法，critic 的损失函数为： <span class="math display">\[
-L_Q(s,a|\theta^Q) = \bigg( Q(s,a|\theta^Q)-\big( r+\gamma Q(s&#39;,\mu(s&#39;|\theta^\mu)&#39;|\theta^Q) \big) \bigg)^2
-\]</span> 更新 actor 时用梯度： <span class="math display">\[
-\nabla_{\theta^\mu} \mu(s) = \nabla_aQ(s,a|\theta^Q) \nabla_{\theta^\mu} \mu(s|\theta^\mu)
+<h1 id="分布空间中最速下降">分布空间中最速下降</h1>
+<p>现在我们已经准备好用 FIM 来加强梯度下降。但首先我们要推导一下 KL 散度在 <span class="math inline">\(\theta\)</span> 周围的泰勒展开。</p>
+<p><em>定理：令 <span class="math inline">\(d\rightarrow 0\)</span> ，KL 散度的泰勒二阶展开式为 <span class="math inline">\(\text{KL}[p(x \vert \theta) \, \Vert \, p(x \vert \theta + d)] \approx \frac{1}{2} d^\text{T} \text{F} d.\)</span></em></p>
+<p>证明：我们用 <span class="math inline">\(p_\theta\)</span> 来表示 <span class="math inline">\(p(x|\theta)\)</span> 。根据定义，函数 <span class="math inline">\(f(\theta)\)</span> 在点 <span class="math inline">\(\theta=\theta&#39;\)</span> 处的泰勒二阶展开为： <span class="math display">\[
+f(\theta&#39;) \approx f(\theta) + (\theta&#39;-\theta)^T\nabla f(\theta) + \frac{1}{2}(\theta&#39;-\theta)^TF(\theta&#39;-\theta)
+\]</span> 那么 KL 散度的泰勒二阶展开为： <span class="math display">\[
+\begin{align}
+    \text{KL}[p_{\theta} \, \Vert \, p_{\theta + d}] &amp;\approx \text{KL}[p_{\theta} \, \Vert \, p_{\theta}] + (\left. \nabla_{\theta&#39;} \text{KL}[p_{\theta} \, \Vert \, p_{\theta&#39;}] \right\vert_{\theta&#39; = \theta})^\text{T} d + \frac{1}{2} d^\text{T} \text{F} d \\[5pt]
+        &amp;= \text{KL}[p_{\theta} \, \Vert \, p_{\theta}] - \mathbb{E}_{p(x \vert \theta)} [ \nabla_\theta \log p(x \vert \theta) ]^\text{T} d + \frac{1}{2} d^\text{T} \text{F} d \\[5pt]
+\end{align}
+\]</span> 其中第一项很明显为 0，第二项也为 0，以下为证明： <span class="math display">\[
+\begin{align}
+    \mathop{\mathbb{E}}_{p(x \vert \theta)} \left[ s(\theta) \right] &amp;= \mathop{\mathbb{E}}_{p(x \vert \theta)} \left[ \nabla \log p(x \vert \theta) \right] \\[5pt]
+    &amp;= \int \nabla \log p(x \vert \theta) \, p(x \vert \theta) \, \text{d}x \\[5pt]
+    &amp;= \int \frac{\nabla p(x \vert \theta)}{p(x \vert \theta)} p(x \vert \theta) \, \text{d}x \\[5pt]
+    &amp;= \int \nabla p(x \vert \theta) \, \text{d}x \\[5pt]
+    &amp;= \nabla \int p(x \vert \theta) \, \text{d}x \\[5pt]
+    &amp;= \nabla 1 \\[5pt]
+    &amp;= 0
+\end{align}
+\]</span> 所以 KL 散度的泰勒二阶展开只剩下： <span class="math display">\[
+\begin{align}
+    \text{KL}[p(x \vert \theta) \, \Vert \, p(x \vert \theta + d)] &amp;\approx \frac{1}{2} d^\text{T} \text{F} d \, .
+\end{align}
 \]</span></p>
-<p>通过下图也能直观的看出更新 critic 与 actor 所需要的梯度。</p>
-<p><img src="/images/2018-11-13-Deep-Reinforcement-Learning-In-Parameterized-Action-Space/P10J76.png"></p>
-<p>为了使算法更加稳定，同样用了 DDPG 中的两个技巧：设置 target 网络与经验回放机制。</p>
-<h2 id="行为的选择与探索-action-selection-and-exploration">行为的选择与探索 Action Selection and Exploration</h2>
-<p>对于确定性行为选择来说，每一步 actor 会输出四个离散的行为和六个参数，我们从四个行为中选取值最大的 <span class="math inline">\(a=\max(Dash,Turn,Tackle,Kick)\)</span> 与对应的参数进行配对，所以 actor 网络会同时选择一个离散的行为去执行，并且用对应的参数来指导如何执行该行为。</p>
-<p>连续行为空间与离散空间的探索有点不一样。我们用 ε-greedy 来对参数化的行为空间进行探索：以概率 <span class="math inline">\(\epsilon\)</span> 随机的选择一个离散的行为 <span class="math inline">\(a\in A_d\)</span> ，然后再均匀的选取该行为所对应的参数 <span class="math inline">\(\{p_1^a,p_2^a,\cdots,p_{m_a}^a\}\)</span></p>
-<h1 id="参数空间的上下界-bounded-parameter-space-learning">参数空间的上下界 Bounded Parameter Space Learning</h1>
-<p>再 HFO 游戏中，所有行为的参数总共有两种：一种是表示方向，在 <span class="math inline">\([-180,180]\)</span> 范围内，另一种表示力度，在 <span class="math inline">\([0,100]\)</span> 范围内，如果 critic 为 actor 提供梯度并且不加限制地让 actor 持续优化，那么行为参数会非常快的超出各自的上下界。论文中提供了三种方法来控制参数的上下界：</p>
-<ol type="1">
-<li>Zeroing Gradients: 这是一种最简单的方法，如果行为参数已经超出上下界，则将 critic 的梯度置零：</li>
-</ol>
-<p><span class="math display">\[
-\nabla_p = 
-\begin{cases}
- \nabla_p       &amp; \text{if}\ \  p_{\min}&lt;p&lt;p_{\max} \\
- 0  &amp;\text{otherwise}
-\end{cases}
-\]</span></p>
-<ol start="2" type="1">
-<li>Squashing (挤压) Gradients: 使用诸如 <span class="math inline">\(\tanh\)</span> 函数来为每个参数增加一个激活函数</li>
-<li>Inverting Gradients: 该方法综合了前两种方法的思想，如果 critic 的梯度表明需要往正方向更新，则 actor 可以进行持续更新，不过更新幅度会逐渐减小，最终会慢慢收敛到上界，如果此时忽然要往负方向更新，更新幅度则会很快：</li>
-</ol>
-<p><span class="math display">\[
-\nabla_p=\nabla_p \cdot
-\begin{cases}
- (p_\max-p)/(p_\max-p_\min) &amp; \text{if}\ \nabla_p \ \text{suggest increasing} \ p\\
- (p-p_\min)/(p_\max-p_\min) &amp;\text{otherwise}
-\end{cases}
-\]</span></p>
-<h1 id="参考">参考</h1>
-<p>Hausknecht, M., &amp; Stone, P. (2015). Deep reinforcement learning in parameterized action space. <em>arXiv preprint arXiv:1511.04143</em>.</p>
-<p>Silver D, Lever G, Heess N, et al. Deterministic policy gradient algorithms[C]// International Conference on International Conference on Machine Learning. JMLR.org, 2014:387-395.</p>
 
       
     </div>
@@ -580,7 +540,7 @@ L_Q(s,a|\theta^Q) = \bigg( Q(s,a|\theta^Q)-\big( r+\gamma Q(s&#39;,\mu(s&#39;|\t
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
     
-    <a href="https://bluefisher.github.io/2018/07/18/Deep-Reinforcement-Learning-In-Parameterized-Action-Space/" title="Deep Reinforcement Learning In Parameterized Action Space">https://bluefisher.github.io/2018/07/18/Deep-Reinforcement-Learning-In-Parameterized-Action-Space/</a>
+    <a href="https://bluefisher.github.io/2020/02/16/Natural-Gradient-Descent/" title="Natural Gradient Descent">https://bluefisher.github.io/2020/02/16/Natural-Gradient-Descent/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
@@ -591,12 +551,6 @@ L_Q(s,a|\theta^Q) = \bigg( Q(s,a|\theta^Q)-\big( r+\gamma Q(s&#39;,\mu(s&#39;|\t
 
     <footer class="post-footer">
       
-        <div class="post-tags">
-          
-            <a href="/tags/RL/" rel="tag"># RL</a>
-          
-        </div>
-      
 
       
       
@@ -606,8 +560,8 @@ L_Q(s,a|\theta^Q) = \bigg( Q(s,a|\theta^Q)-\big( r+\gamma Q(s&#39;,\mu(s&#39;|\t
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/07/16/High-Dimensional-Continuous-Control-Using-Generalized-Advantage-Estimation/" rel="next" title="High-Dimensional Continuous Control Using Generalized Advantage Estimation">
-                <i class="fa fa-chevron-left"></i> High-Dimensional Continuous Control Using Generalized Advantage Estimation
+              <a href="/2020/02/07/理解-Variational-Autoencoders-VAEs/" rel="next" title="理解 Variational Autoencoders (VAEs)">
+                <i class="fa fa-chevron-left"></i> 理解 Variational Autoencoders (VAEs)
               </a>
             
           </div>
@@ -615,10 +569,6 @@ L_Q(s,a|\theta^Q) = \bigg( Q(s,a|\theta^Q)-\big( r+\gamma Q(s&#39;,\mu(s&#39;|\t
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/08/03/Memory-Based-Control-With-Recurrent-Neural-Networks/" rel="prev" title="Memory-Based Control With Recurrent Neural Networks">
-                Memory-Based Control With Recurrent Neural Networks <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -864,7 +814,7 @@ L_Q(s,a|\theta^Q) = \bigg( Q(s,a|\theta^Q)-\big( r+\gamma Q(s&#39;,\mu(s&#39;|\t
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#hfo-介绍"><span class="nav-number">1.</span> <span class="nav-text">HFO 介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#状态空间"><span class="nav-number">1.1.</span> <span class="nav-text">状态空间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#行为空间"><span class="nav-number">1.2.</span> <span class="nav-text">行为空间</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#奖励函数"><span class="nav-number">1.2.1.</span> <span class="nav-text">奖励函数</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参数化行为空间的架构-parameterized-action-space-architecture"><span class="nav-number">2.</span> <span class="nav-text">参数化行为空间的架构 Parameterized Action Space Architecture</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#神经网络架构"><span class="nav-number">2.1.</span> <span class="nav-text">神经网络架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#行为的选择与探索-action-selection-and-exploration"><span class="nav-number">2.2.</span> <span class="nav-text">行为的选择与探索 Action Selection and Exploration</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参数空间的上下界-bounded-parameter-space-learning"><span class="nav-number">3.</span> <span class="nav-text">参数空间的上下界 Bounded Parameter Space Learning</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#fisher-and-kl-divergence"><span class="nav-number">1.</span> <span class="nav-text">Fisher and KL-divergence</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#分布空间中最速下降"><span class="nav-number">2.</span> <span class="nav-text">分布空间中最速下降</span></a></li></ol></div>
             
 
           </div>
@@ -1022,9 +972,9 @@ L_Q(s,a|\theta^Q) = \bigg( Q(s,a|\theta^Q)-\big( r+\gamma Q(s&#39;,\mu(s&#39;|\t
   
     <script>
       var disqus_config = function () {
-        this.page.url = "https://bluefisher.github.io/2018/07/18/Deep-Reinforcement-Learning-In-Parameterized-Action-Space/";
-        this.page.identifier = "2018/07/18/Deep-Reinforcement-Learning-In-Parameterized-Action-Space/";
-        this.page.title = 'Deep Reinforcement Learning In Parameterized Action Space';
+        this.page.url = "https://bluefisher.github.io/2020/02/16/Natural-Gradient-Descent/";
+        this.page.identifier = "2020/02/16/Natural-Gradient-Descent/";
+        this.page.title = 'Natural Gradient Descent';
         };
       function loadComments () {
         var d = document, s = d.createElement('script');

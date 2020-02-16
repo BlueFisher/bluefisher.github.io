@@ -575,6 +575,170 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2020/02/16/Natural-Gradient-Descent/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Fisher Chang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fisher's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2020/02/16/Natural-Gradient-Descent/" class="post-title-link" itemprop="url">Natural Gradient Descent</a>
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-02-16 20:08:26 / 修改时间：21:12:33" itemprop="dateCreated datePublished" datetime="2020-02-16T20:08:26+08:00">2020-02-16</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/02/16/Natural-Gradient-Descent/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2020/02/16/Natural-Gradient-Descent/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>本文翻译自 <a href="https://wiseodd.github.io/techblog/2018/03/14/natural-gradient/" target="_blank" rel="noopener">Natural Gradient Descent</a>, <a href="https://wiseodd.github.io/" target="_blank" rel="noopener">Agustinus Kristiadi</a>.</p>
+<p>假设我们现在有一个概率模型 <span class="math inline">\(p(x|\theta)\)</span> ，我们希望通过最大化似然函数来找到最优的参数 <span class="math inline">\(\theta\)</span>，也就是最小化损失函数 <span class="math inline">\(\mathcal{L}(\theta)\)</span> ，即负的似然函数。 一般用来解决优化问题的方法是使用梯度下降法，我们根据 <span class="math inline">\(-\nabla \mathcal{L}(\theta)\)</span> 的方向来使参数向前走一步，这个方向是 <span class="math inline">\(\theta\)</span> 在参数空间中最陡峭的方向。可以用如下公式表示： <span class="math display">\[
+\frac{-\nabla_\theta \mathcal{L}(\theta)}{\lVert \nabla_\theta \mathcal{L}(\theta) \rVert} = \lim_{\epsilon \to 0} \frac{1}{\epsilon} \mathop{\text{arg min}}_{\text{ s.t. } \lVert d \rVert \leq \epsilon} \mathcal{L}(\theta + d) \, .
+\]</span> 意思就是要去选取一个向量 <span class="math inline">\(d\)</span> ，使得新参数 <span class="math inline">\(\theta +d\)</span> 在参数 <span class="math inline">\(\theta\)</span> 的距离为 <span class="math inline">\(\epsilon\)</span> 的范围内，并能最小化损失。注意我们在描述这个范围的时候用的是欧几里得范数，因此梯度下降取决于参数空间（parameter space）的欧几里得几何。</p>
+<p>但如果我们的目标是使损失函数最小（使似然性最大化），那么很自然地，我们会在所有可能的似然性空间中让参数向前走一步。 由于似然函数本身是概率分布，因此我们可以将其称为分布空间（distribution space） 。 因此，在该分布空间而不是参数空间中采用最陡的下降方向是有意义的。</p>
+<p>那么我们应该在该空间中使用哪个度量/距离呢？一个流行的选择是 KL 散度。</p>
+          <!--noindex-->
+          
+            <div class="post-button text-center">
+              <a class="btn" href="/2020/02/16/Natural-Gradient-Descent/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2020/02/07/理解-Variational-Autoencoders-VAEs/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2065,200 +2229,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2019/01/02/Distributed-Prioritized-Experience-Replay/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Fisher Chang">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Fisher's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/01/02/Distributed-Prioritized-Experience-Replay/" class="post-title-link" itemprop="url">Distributed Prioritized Experience Replay</a>
-              
-            
-          </h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-01-02 21:09:33" itemprop="dateCreated datePublished" datetime="2019-01-02T21:09:33+08:00">2019-01-02</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2019-01-03 11:02:36" itemprop="dateModified" datetime="2019-01-03T11:02:36+08:00">2019-01-03</time>
-              
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Reinforcement-Learning/" itemprop="url" rel="index"><span itemprop="name">Reinforcement Learning</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2019/01/02/Distributed-Prioritized-Experience-Replay/#comments" itemprop="discussionUrl">
-                
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/01/02/Distributed-Prioritized-Experience-Replay/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>DeepMind 在 ICLR 上发表了 <a href="http://arxiv.org/abs/1803.00933" target="_blank" rel="noopener">Distributed Prioritized Experience Replay</a> ，可以让强化学习算法更有效地利用大规模数据。文章的思想很简单，算法将强化学习分为行为产生器 actor 和学习器 learner ，每个 actor 独立的与环境进行交互，但行为根据一个共享的网络生成，然后将累积的经验存在共享的经验池 experience replay memory 中；learner 从经验池中采样经验并进行学习，然后更新共享的神经网络参数。整个架构建立在 prioritized experience replay 的基础上。</p>
-          <!--noindex-->
-          
-            <div class="post-button text-center">
-              <a class="btn" href="/2019/01/02/Distributed-Prioritized-Experience-Replay/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -2303,7 +2278,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">50</span>
+                    <span class="site-state-item-count">51</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
