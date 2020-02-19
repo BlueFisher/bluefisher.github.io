@@ -103,7 +103,7 @@
 <meta property="og:site_name" content="Fisher&#39;s Blog">
 <meta property="og:description" content="一般环境的动作空间是有界的，但由于策略是个分布，如高斯分布，是无界的，所以我们需要对动作进行 squashing 挤压。\(\tanh\) 是一个可逆函数，值域在 \((-1,1)\) 之间，非常适合用来达到我们的目的。 换句话说，一个 squashed 后的与状态独立的高斯策略应该是 \(\mathbf{a}=\tanh \left(\mathbf{b}_{\phi}(\mathbf{s})+">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-02-19T02:13:36.715Z">
+<meta property="og:updated_time" content="2020-02-19T02:15:41.470Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Squashing">
 <meta name="twitter:description" content="一般环境的动作空间是有界的，但由于策略是个分布，如高斯分布，是无界的，所以我们需要对动作进行 squashing 挤压。\(\tanh\) 是一个可逆函数，值域在 \((-1,1)\) 之间，非常适合用来达到我们的目的。 换句话说，一个 squashed 后的与状态独立的高斯策略应该是 \(\mathbf{a}=\tanh \left(\mathbf{b}_{\phi}(\mathbf{s})+">
@@ -413,7 +413,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2020-02-19 10:13:36" itemprop="dateModified" datetime="2020-02-19T10:13:36+08:00">2020-02-19</time>
+                <time title="修改时间：2020-02-19 10:15:41" itemprop="dateModified" datetime="2020-02-19T10:15:41+08:00">2020-02-19</time>
               
             
           </span>
@@ -488,10 +488,10 @@
 <p>在实际开发中，对于 <span class="math inline">\(\tanh\)</span> ，雅可比矩阵是对角为 <span class="math inline">\(\frac{d \tanh \left(z_{i}\right)}{d z_{i}}=1-\tanh ^{2}\left(z_{i}\right)\)</span> 的对角矩阵，因此我们有： <span class="math display">\[
 \log \left|\operatorname{det}\left(\frac{d f_{2}(\mathbf{z})}{d \mathbf{z}}\right)\right|=\sum_{i=1}^{|\mathcal{A}|} \log \left(1-\tanh ^{2}\left(z_{i}\right)\right)
 \]</span> 即： <span class="math display">\[
-\pi(\mathbf{a} | \mathbf{s})=\mu(\mathbf{u} | \mathbf{s})\left|\operatorname{det}\left(\frac{\mathrm{da}}{\mathrm{du}}\right)\right|^{-1}
+\pi(\mathbf{a} | \mathbf{s})=\mu(\mathbf{z} | \mathbf{s})\left|\operatorname{det}\left(\frac{\mathrm{da}}{\mathrm{dz}}\right)\right|^{-1}
 \]</span></p>
 <p><span class="math display">\[
-\log \pi(\mathbf{a} | \mathbf{s})=\log \mu(\mathbf{u} | \mathbf{s})-\sum_{i=1}^{|\mathcal{A}|} \log \left(1-\tanh ^{2}\left(u_{i}\right)\right)
+\log \pi(\mathbf{a} | \mathbf{s})=\log \mu(\mathbf{z} | \mathbf{s})-\sum_{i=1}^{|\mathcal{A}|} \log \left(1-\tanh ^{2}\left(z_{i}\right)\right)
 \]</span></p>
 
       
