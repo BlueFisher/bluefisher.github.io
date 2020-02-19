@@ -620,16 +620,46 @@
                 
               
 
-              <time title="创建时间：2020-02-18 21:16:18 / 修改时间：22:16:52" itemprop="dateCreated datePublished" datetime="2020-02-18T21:16:18+08:00">2020-02-18</time>
+              <time title="创建时间：2020-02-18 21:16:18" itemprop="dateCreated datePublished" datetime="2020-02-18T21:16:18+08:00">2020-02-18</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-02-19 10:13:36" itemprop="dateModified" datetime="2020-02-19T10:13:36+08:00">2020-02-19</time>
               
             
           </span>
 
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Reinforcement-Learning/" itemprop="url" rel="index"><span itemprop="name">Reinforcement Learning</span></a></span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -673,11 +703,14 @@
           
             <p>一般环境的动作空间是有界的，但由于策略是个分布，如高斯分布，是无界的，所以我们需要对动作进行 squashing 挤压。<span class="math inline">\(\tanh\)</span> 是一个可逆函数，值域在 <span class="math inline">\((-1,1)\)</span> 之间，非常适合用来达到我们的目的。</p>
 <p>换句话说，一个 squashed 后的与状态独立的高斯策略应该是 <span class="math inline">\(\mathbf{a}=\tanh \left(\mathbf{b}_{\phi}(\mathbf{s})+\mathbf{A}_{\phi}(\mathbf{s}) \epsilon\right)\)</span> ，其中 <span class="math inline">\(\epsilon \sim \mathcal{N}(0, I)\)</span> ， <span class="math inline">\(\mathbf{b}\)</span> 是可训练的偏差，<span class="math inline">\(\mathbf{A}\)</span> 是可训练的满秩矩阵，一般来说是对角全为正数的对角矩阵。我们可以将两个函数的转换简写成：<span class="math inline">\(\mathbf{a}=\left(f_{2} \circ f_{1}\right)(\epsilon)\)</span> ，其中 <span class="math inline">\(\mathbf{z}=f_{1}(\epsilon) \triangleq b(\mathbf{s})+A(\mathbf{s}) \epsilon\)</span> ， <span class="math inline">\(\mathbf{a}=f_{2}(\mathbf{z}) \triangleq \tanh (\mathbf{z})\)</span> 。</p>
-<p>Soft actor-critic 需要我们计算动作的 log-likelihood 值，因为 <span class="math inline">\(f_1\)</span> 和 <span class="math inline">\(f_2\)</span> 都是可逆的，所以我们可以应用如下定理：对于任意可逆函数 <span class="math inline">\(\mathbf{z}^{(i)}=f_{i}\left(\mathbf{z}^{(i-1)}\right)\)</span> ，我们有 $$ <span class="math display">\[\begin{align}
+<p>Soft actor-critic 需要我们计算动作的 log-likelihood 值，因为 <span class="math inline">\(f_1\)</span> 和 <span class="math inline">\(f_2\)</span> 都是可逆的，所以我们可以应用如下定理：对于任意可逆函数 <span class="math inline">\(\mathbf{z}^{(i)}=f_{i}\left(\mathbf{z}^{(i-1)}\right)\)</span> ，我们有</p>
+<p><span class="math display">\[
+\begin{align}
 \mathrm{z}^{(N)}=\left(f_{N} \circ \cdots \circ f_{1}\right)\left(\mathrm{z}^{0}\right) &amp; \Leftrightarrow \\
-
 \log p\left(\mathrm{z}^{(N)}\right) &amp;= \log p\left(\mathrm{z}^{(0)}\right)-\sum_{i=1}^{N} \log \left|\operatorname{det}\left(\frac{d f_{i}\left(\mathrm{z}^{(i-1)}\right)}{d \mathrm{z}^{(i-1)}}\right)\right|
-\end{align}\]</span> $$ 其中 <span class="math inline">\(\frac{d f_{i}(\mathbf{z})}{d \mathbf{z}}\)</span> 是 <span class="math inline">\(f_i\)</span> 的雅可比矩阵。</p>
+\end{align}
+\]</span></p>
+<p>其中 <span class="math inline">\(\frac{d f_{i}(\mathbf{z})}{d \mathbf{z}}\)</span> 是 <span class="math inline">\(f_i\)</span> 的雅可比矩阵。</p>
 <p>在实际开发中，对于 <span class="math inline">\(\tanh\)</span> ，雅可比矩阵是对角为 <span class="math inline">\(\frac{d \tanh \left(z_{i}\right)}{d z_{i}}=1-\tanh ^{2}\left(z_{i}\right)\)</span> 的对角矩阵，因此我们有： <span class="math display">\[
 \log \left|\operatorname{det}\left(\frac{d f_{2}(\mathbf{z})}{d \mathbf{z}}\right)\right|=\sum_{i=1}^{|\mathcal{A}|} \log \left(1-\tanh ^{2}\left(z_{i}\right)\right)
 \]</span> 即： <span class="math display">\[
@@ -787,16 +820,46 @@
                 
               
 
-              <time title="创建时间：2020-02-16 20:08:26 / 修改时间：22:08:39" itemprop="dateCreated datePublished" datetime="2020-02-16T20:08:26+08:00">2020-02-16</time>
+              <time title="创建时间：2020-02-16 20:08:26" itemprop="dateCreated datePublished" datetime="2020-02-16T20:08:26+08:00">2020-02-16</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-02-19 10:13:57" itemprop="dateModified" datetime="2020-02-19T10:13:57+08:00">2020-02-19</time>
               
             
           </span>
 
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Machine-Learning/" itemprop="url" rel="index"><span itemprop="name">Machine Learning</span></a></span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -968,7 +1031,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2020-02-08 18:59:58" itemprop="dateModified" datetime="2020-02-08T18:59:58+08:00">2020-02-08</time>
+                <time title="修改时间：2020-02-19 10:14:14" itemprop="dateModified" datetime="2020-02-19T10:14:14+08:00">2020-02-19</time>
               
             
           </span>
@@ -2336,7 +2399,11 @@
                     
                       
                     
-                    <span class="site-state-item-count">14</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
