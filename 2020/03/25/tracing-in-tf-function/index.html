@@ -103,7 +103,7 @@
 <meta property="og:site_name" content="Fisher&#39;s Blog">
 <meta property="og:description" content="123import tensorflow as tfimport numpy as npimport time 比较动态图与静态图的执行速度 12345678910111213def test1(a, b):    a = tf.pow(a, 2)    b = tf.pow(b, 2)    a = a * b    return a, b@tf.functiondef test2(a, b">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-03-25T05:07:37.751Z">
+<meta property="og:updated_time" content="2020-03-25T06:32:57.287Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="tracing in tf.function">
 <meta name="twitter:description" content="123import tensorflow as tfimport numpy as npimport time 比较动态图与静态图的执行速度 12345678910111213def test1(a, b):    a = tf.pow(a, 2)    b = tf.pow(b, 2)    a = a * b    return a, b@tf.functiondef test2(a, b">
@@ -396,7 +396,7 @@
                 
               
 
-              <time title="创建时间：2020-03-25 13:06:25 / 修改时间：13:07:37" itemprop="dateCreated datePublished" datetime="2020-03-25T13:06:25+08:00">2020-03-25</time>
+              <time title="创建时间：2020-03-25 13:06:25 / 修改时间：14:32:57" itemprop="dateCreated datePublished" datetime="2020-03-25T13:06:25+08:00">2020-03-25</time>
             
 
             
@@ -478,6 +478,7 @@
 <pre><code>动态图 3.0627214908599854
 静态图第一次构造 0.5964057445526123
 静态图 0.6522562503814697</code></pre>
+<a id="more"></a>
 <h2 id="tf.function多次trace问题">tf.function多次trace问题</h2>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">test1</span><span class="params">(a, b)</span>:</span></span><br><span class="line">    print(<span class="string">'动态图执行'</span>)</span><br><span class="line">    a = tf.pow(a, <span class="number">2</span>)</span><br><span class="line">    b = tf.pow(b, <span class="number">2</span>)</span><br><span class="line">    a = a * b</span><br><span class="line">    <span class="keyword">return</span> a, b</span><br><span class="line"></span><br><span class="line"><span class="meta">@tf.function</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">test2</span><span class="params">(a, b)</span>:</span></span><br><span class="line">    print(<span class="string">'静态图trace'</span>)</span><br><span class="line">    a = tf.pow(a, <span class="number">2</span>)</span><br><span class="line">    b = tf.pow(b, <span class="number">2</span>)</span><br><span class="line">    a = a * b</span><br><span class="line">    <span class="keyword">return</span> a, b</span><br></pre></td></tr></table></figure>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> _ <span class="keyword">in</span> range(<span class="number">10</span>):</span><br><span class="line">    test1(a, b)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> _ <span class="keyword">in</span> range(<span class="number">10</span>):</span><br><span class="line">    test2(a, b)</span><br></pre></td></tr></table></figure>
@@ -557,13 +558,10 @@ ValueError                                Traceback (most recent call last)
      97 
 
 
-ValueError: Attempt to convert a value (None) with an unsupported type (&lt;class &#39;NoneType&#39;&gt;) to a Tensor.
-
-
-During handling of the above exception, another exception occurred:
-
-
-ValueError                                Traceback (most recent call last)
+ValueError: Attempt to convert a value (None) with an unsupported type (&lt;class &#39;NoneType&#39;&gt;) to a Tensor.</code></pre>
+<p>​<br>
+During handling of the above exception, another exception occurred:</p>
+<pre><code>ValueError                                Traceback (most recent call last)
 
 &lt;ipython-input-14-ea9826667fb9&gt; in &lt;module&gt;
       1 for batch in range(10):
@@ -836,13 +834,10 @@ KeyError                                  Traceback (most recent call last)
    1575       except KeyError:
 
 
-KeyError: &#39;b&#39;
-
-
-During handling of the above exception, another exception occurred:
-
-
-TypeError                                 Traceback (most recent call last)
+KeyError: &#39;b&#39;</code></pre>
+<p>​<br>
+During handling of the above exception, another exception occurred:</p>
+<pre><code>TypeError                                 Traceback (most recent call last)
 
 &lt;ipython-input-24-c93942248dfa&gt; in &lt;module&gt;
       1 # 若concrete_function参数中没有None，且指定了Tensor格式，则也不能不传
