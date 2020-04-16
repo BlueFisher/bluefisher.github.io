@@ -575,6 +575,172 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2020/04/16/Overleaf-服务器配置/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Fisher Chang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fisher's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2020/04/16/Overleaf-服务器配置/" class="post-title-link" itemprop="url">Overleaf 服务器配置</a>
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-04-16 21:47:59 / 修改时间：22:48:01" itemprop="dateCreated datePublished" datetime="2020-04-16T21:47:59+08:00">2020-04-16</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/04/16/Overleaf-服务器配置/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2020/04/16/Overleaf-服务器配置/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol type="1">
+<li><p>首先根据官方教程 <a href="https://docs.docker.com/engine/install/ubuntu/" class="uri" target="_blank" rel="noopener">https://docs.docker.com/engine/install/ubuntu/</a> 确保服务器已经安装了 Docker，同时根据 https://docs.docker.com/compose/install/ 安装 Docker Compose。</p></li>
+<li><p>拉取最新的 overleaf 服务器版本</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker pull sharelatex/sharelatex</span><br></pre></td></tr></table></figure></li>
+<li><p>在用户目录 <code>~</code> 下新建文件夹 <code>~/sharelatex/, ~/sharelatex/sharelatex_data/, ~/sharelatex/mongo_data/, ~/sharelatex/redis_data/</code></p></li>
+<li><p>下载 <a href="https://github.com/overleaf/overleaf/blob/master/docker-compose.yml" target="_blank" rel="noopener">docker-compose.yml</a> 文件，并存在 <code>~/sharelatex/​</code> 文件夹中</p></li>
+<li><p>根据需要修改 docker-compose.yml 文件，可以更改服务器映射的端口号 <code>ports</code> ，修改 sharelatex, mongo 和 redis 的<code>volumes</code> 到步骤3创建的文件夹中</p></li>
+<li><p>进入 <code>~sharelatex</code> 启动 docker-compose.yml</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker-compose up</span></span><br></pre></td></tr></table></figure></li>
+<li><p>由于默认安装的是最小版本 TeXLive，如果要安装完整包，执行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker <span class="built_in">exec</span> sharelatex tlmgr install scheme-full</span></span><br></pre></td></tr></table></figure>
+<p>或者也可以安装任意的单个包，只需要把 <code>sheme-full</code> 替换为包的名称即可</p></li>
+<li><p>第一次启动镜像后，访问 <code>/launchpad</code> 页面设置管理员账号</p></li>
+</ol>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2020/03/25/tracing-in-tf-function/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2095,189 +2261,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2019/06/01/Hindsight-Experience-Replay/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Fisher Chang">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Fisher's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/06/01/Hindsight-Experience-Replay/" class="post-title-link" itemprop="url">Hindsight Experience Replay</a>
-              
-            
-          </h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-06-01 19:52:53 / 修改时间：20:02:20" itemprop="dateCreated datePublished" datetime="2019-06-01T19:52:53+08:00">2019-06-01</time>
-            
-
-            
-              
-
-              
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Reinforcement-Learning/" itemprop="url" rel="index"><span itemprop="name">Reinforcement Learning</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2019/06/01/Hindsight-Experience-Replay/#comments" itemprop="discussionUrl">
-                
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/06/01/Hindsight-Experience-Replay/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>转载自 Keavnn's Blog <a href="https://stepneverstop.github.io/Hindsight-Experience-Replay.html" class="uri" target="_blank" rel="noopener">https://stepneverstop.github.io/Hindsight-Experience-Replay.html</a></p>
-<p>本文介绍了一个“事后诸葛亮”的经验池机制，简称为<strong>HER</strong>，它可以很好地应用于<strong>稀疏奖励</strong>和<strong>二分奖励</strong>的问题中，不需要复杂的奖励函数工程设计。</p>
-<p>推荐：</p>
-<ul>
-<li>稀疏奖励问题的一种解决方案</li>
-<li>通俗易懂</li>
-</ul>
-          <!--noindex-->
-          
-            <div class="post-button text-center">
-              <a class="btn" href="/2019/06/01/Hindsight-Experience-Replay/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2327,7 +2310,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">53</span>
+                    <span class="site-state-item-count">54</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -2673,9 +2656,9 @@
       
     
       
-        
-      
     
+      
+        
       
     
       
