@@ -620,12 +620,24 @@
                 
               
 
-              <time title="创建时间：2020-04-16 21:47:59 / 修改时间：22:48:01" itemprop="dateCreated datePublished" datetime="2020-04-16T21:47:59+08:00">2020-04-16</time>
+              <time title="创建时间：2020-04-16 21:47:59" itemprop="dateCreated datePublished" datetime="2020-04-16T21:47:59+08:00">2020-04-16</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-04-17 10:39:08" itemprop="dateModified" datetime="2020-04-17T10:39:08+08:00">2020-04-17</time>
               
             
           </span>
@@ -677,7 +689,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker pull sharelatex/sharelatex</span><br></pre></td></tr></table></figure></li>
 <li><p>在用户目录 <code>~</code> 下新建文件夹 <code>~/sharelatex/, ~/sharelatex/sharelatex_data/, ~/sharelatex/mongo_data/, ~/sharelatex/redis_data/</code></p></li>
 <li><p>下载 <a href="https://github.com/overleaf/overleaf/blob/master/docker-compose.yml" target="_blank" rel="noopener">docker-compose.yml</a> 文件，并存在 <code>~/sharelatex/​</code> 文件夹中</p></li>
-<li><p>根据需要修改 docker-compose.yml 文件，可以更改服务器映射的端口号 <code>ports</code> ，修改 sharelatex, mongo 和 redis 的<code>volumes</code> 到步骤3创建的文件夹中</p></li>
+<li><p>根据需要修改 docker-compose.yml 文件，可以更改服务器映射的端口号 <code>ports</code> ，修改 sharelatex, mongo 和 redis 的<code>volumes</code> 到步骤3创建的文件夹中。注意 <code>SHARELATEX_APP_NAME</code> 中不能有特殊字符，否则可能会解析失败。</p></li>
 <li><p>进入 <code>~sharelatex</code> 启动 docker-compose.yml</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker-compose up</span></span><br></pre></td></tr></table></figure></li>
 <li><p>由于默认安装的是最小版本 TeXLive，如果要安装完整包，执行</p>
