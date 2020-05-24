@@ -228,6 +228,27 @@
             </span>
 
           
+            <span id="/2018/09/28/Incentivizing-Exploration-In-Reinforcement-Learning-With-Deep-Predictive-Models/" class="post-meta-item leancloud_visitors" data-flag-title="Incentivizing Exploration In Reinforcement Learning With Deep Predictive Models" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/09/28/Incentivizing-Exploration-In-Reinforcement-Learning-With-Deep-Predictive-Models/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/09/28/Incentivizing-Exploration-In-Reinforcement-Learning-With-Deep-Predictive-Models/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
 
         </div>
       </header>
@@ -338,6 +359,7 @@ e(s_t,a_t)=||\sigma(s_{t+1})-\mathcal{M}_\phi(\sigma(s_t),a_t)||_2^2
 
           </div>
           
+    <div class="comments" id="valine-comments"></div>
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -578,6 +600,35 @@ e(s_t,a_t)=||\sigma(s_{t+1})-\mathcal{M}_\phi(\sigma(s_t),a_t)||_2^2
     
 
   
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : '7ruImtbdRTEUvc3qxbGlSc0t-gzGzoHsz',
+      appKey     : 'Vbun7eF790Szhvl9qKC0CCsm',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
 
 </body>
 </html>
