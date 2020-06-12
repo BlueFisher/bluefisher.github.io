@@ -311,6 +311,135 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2020/06/09/Never-Give-Up-Learning-Directed-Exploration-Strategies/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
+      <meta itemprop="name" content="Fisher Chang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fisher's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/06/09/Never-Give-Up-Learning-Directed-Exploration-Strategies/" class="post-title-link" itemprop="url">Never Give Up: Learning Directed Exploration Strategies</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-06-09 20:16:00" itemprop="dateCreated datePublished" datetime="2020-06-09T20:16:00+08:00">2020-06-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-12 23:27:51" itemprop="dateModified" datetime="2020-06-12T23:27:51+08:00">2020-06-12</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Reinforcement-Learning/" itemprop="url" rel="index"><span itemprop="name">Reinforcement Learning</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/06/09/Never-Give-Up-Learning-Directed-Exploration-Strategies/" class="post-meta-item leancloud_visitors" data-flag-title="Never Give Up: Learning Directed Exploration Strategies" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/06/09/Never-Give-Up-Learning-Directed-Exploration-Strategies/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/06/09/Never-Give-Up-Learning-Directed-Exploration-Strategies/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><em>Never Give Up: Learning Directed Exploration Strategies</em> 是 DeepMind 在 ICLR 2020 上发表的一篇论文，主要解决探索与利用问题。这篇论文可以看作是三篇论文的结合：</p>
+<ol type="1">
+<li>Curiosity-driven Exploration by Self-supervised Prediction</li>
+<li>Neural Episodic Control</li>
+<li>Exploration by Random Network Distillation</li>
+</ol>
+<p>也是使用内在奖励 (intrinsic reward) 机制，与外部奖励 (external reward) 合起来作为奖励值进行强化学习的训练。</p>
+<h1 id="never-give-up">Never Give Up</h1>
+<p>论文中 intrinsic reward 的主要思想很简单，主要有两部分组成：单个 episode 中的新颖程度 (per-episode novelty) 和整个训练阶段的新颖程度 (life-long novelty)。Episode novelty 鼓励智能体能周期性地在不同 episodes 之间访问相同的状态，但不鼓励在同一 episode 中访问相同的状态。而 life-long novelty 则逐渐降低不同 episodes 之间访问相同状态的新颖性。</p>
+<p>Episode novelty 主要用论文 <em>Neural Episodic Control</em> 中的 episodic memory 来解决，其中的 embedding network 主要用 <em>Curiosity-driven Exploration by Self-supervised Prediction</em> 方法，life-long novelty 则使用论文 <em>Exploration by Random Network Distillation</em> 中的 Random Network Distillation 来解决。</p>
+<h2 id="embedding-network">Embedding network</h2>
+<p><span class="math inline">\(f: \mathcal{O}\rightarrow\mathbb{R}^p\)</span> 将当前的观测值映射到维度是 <span class="math inline">\(p\)</span> 的向量中。映射的训练方法就是 <em>Curiosity-driven Exploration by Self-supervised Prediction</em> 中给定 <span class="math inline">\(t\)</span> 与 <span class="math inline">\(t+1\)</span> 时刻的两个观测值，预测观测值转移时所做的动作 <span class="math inline">\(p\left(a | x_{t}, x_{t+1}\right)=h\left(f\left(x_{t}\right), f\left(x_{t+1}\right)\right)\)</span> ，在这个预测的训练过程中训练这个映射。</p>
+<h2 id="episodic-memory-and-intrinsic-reward">Episodic memory and intrinsic reward</h2>
+<p>Episodic memory <span class="math inline">\(M\)</span> 就是一个动态的储存 embedding 后状态的缓冲区 <span class="math inline">\(\left\{f\left(x_{0}\right), f\left(x_{1}\right), \ldots, f\left(x_{t-1}\right)\right\}\)</span> 。</p>
+<p>Intrinsic reward 定义为：</p>
+<p><span class="math display">\[
+r_{t}^{\text {episodic }}=\frac{1}{\sqrt{n\left(f\left(x_{t}\right)\right)}} \approx \frac{1}{\sqrt{\sum_{f_{i} \in N_{k}} K\left(f\left(x_{t}\right), f_{i}\right)}+c}
+\]</span></p>
+<p><span class="math inline">\(n\left(f\left(x_{t}\right)\right)\)</span> 表示状态 <span class="math inline">\(f\left(x_{t}\right)\)</span> 访问过的次数，我们用核函数 <span class="math inline">\(K: \mathbb{R}^{p} \times \mathbb{R}^{p} \rightarrow \mathbb{R}\)</span> 来表示该状态与其他状态的相似度之和，以此来近似 <span class="math inline">\(n\left(f\left(x_{t}\right)\right)\)</span> 。在实际中，与 <em>Neural Episodic Control</em> 相同，用 KNN 来计算 <span class="math inline">\(f(x_t)\)</span> 在 <span class="math inline">\(M\)</span> 中 <span class="math inline">\(k\)</span> 个最近状态，用 <span class="math inline">\(N_{k}=\left\{f_{i}\right\}_{i=1}^{k}\)</span> 表示。<span class="math inline">\(c\)</span> 是一个小常数。<span class="math inline">\(K\)</span> 是一个逆核： <span class="math display">\[
+K(x, y)=\frac{\epsilon}{\frac{d^{2}(x, y)}{d_{m}^{2}}+\epsilon}
+\]</span> <span class="math inline">\(\epsilon\)</span> 也是一个小常数，<span class="math inline">\(d\)</span> 是欧拉距离，<span class="math inline">\(d^2_m\)</span> 是 <span class="math inline">\(k\)</span> 个最近状态的平方欧拉距离的平均值。</p>
+<h2 id="integrating-life-long-curiosity">Integrating life-long curiosity</h2>
+<p>Life-long curiosity 即是在 intrinsic reward 的基础上增加了一个动态系数 <span class="math inline">\(\alpha_t\)</span>： <span class="math display">\[
+r_{t}^{i}=r_{t}^{\text {episodic }} \cdot \min \left\{\max \left\{\alpha_{t}, 1\right\}, L\right\}
+\]</span> 这个系数代表当前状态有多新颖，用的是 <em>Exploration by Random Network Distillation</em> 方法。该方法也非常简单，任意选定一个随机的、权值固定不变的网络 <span class="math inline">\(g: \mathcal{O} \rightarrow \mathbb{R}^{k}\)</span> 和一个预测网络 <span class="math inline">\(\hat{g}: \mathcal{O} \rightarrow \mathbb{R}^{k}\)</span> 。让这个预测网络尽可能接近随机网络： <span class="math display">\[
+\operatorname{err}\left(x_{t}\right)=\left\|\hat{g}\left(x_{t} ; \theta\right)-g\left(x_{t}\right)\right\|^{2}
+\]</span></p>
+<p><span class="math display">\[
+\alpha_{t}=1+\frac{\operatorname{err}\left(x_{t}\right)-\mu_{e}}{\sigma_{e}}
+\]</span></p>
+<p>其中 <span class="math inline">\(\sigma_e, \mu_e\)</span> 是 <span class="math inline">\(\operatorname{err}\left(x_{t}\right)\)</span> 的动态标准差和均值。</p>
+<h1 id="参考">参考</h1>
+<p>Badia, A. P., Sprechmann, P., Vitvitskyi, A., Guo, D., Piot, B., Kapturowski, S., ... &amp; Blundell, C. (2020). Never Give Up: Learning Directed Exploration Strategies. <em>arXiv preprint arXiv:2002.06038</em>.</p>
+<p>Pritzel, A., Uria, B., Srinivasan, S., Badia, A. P., Vinyals, O., Hassabis, D., ... &amp; Blundell, C. (2017, August). Neural episodic control. In <em>Proceedings of the 34th International Conference on Machine Learning-Volume 70</em> (pp. 2827-2836). JMLR. org.</p>
+<p>Burda, Y., Edwards, H., Storkey, A., &amp; Klimov, O. (2018). Exploration by random network distillation. <em>arXiv preprint arXiv:1810.12894</em>.</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2020/06/03/CURL-Contrastive-Unsupervised-Representations-for-Reinforcement-Learning/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1159,108 +1288,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2019/08/22/Recurrent-Experience-Replay-In-Distributed-Reinforcement-Learning/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
-      <meta itemprop="name" content="Fisher Chang">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Fisher's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2019/08/22/Recurrent-Experience-Replay-In-Distributed-Reinforcement-Learning/" class="post-title-link" itemprop="url">Recurrent Experience Replay In Distributed Reinforcement Learning</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2019-08-22 14:56:55" itemprop="dateCreated datePublished" datetime="2019-08-22T14:56:55+08:00">2019-08-22</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2019-08-23 19:09:59" itemprop="dateModified" datetime="2019-08-23T19:09:59+08:00">2019-08-23</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Reinforcement-Learning/" itemprop="url" rel="index"><span itemprop="name">Reinforcement Learning</span></a>
-                </span>
-            </span>
-
-          
-            <span id="/2019/08/22/Recurrent-Experience-Replay-In-Distributed-Reinforcement-Learning/" class="post-meta-item leancloud_visitors" data-flag-title="Recurrent Experience Replay In Distributed Reinforcement Learning" title="阅读次数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span class="leancloud-visitors-count"></span>
-            </span>
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="fa fa-comment-o"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2019/08/22/Recurrent-Experience-Replay-In-Distributed-Reinforcement-Learning/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2019/08/22/Recurrent-Experience-Replay-In-Distributed-Reinforcement-Learning/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>DeepMind 在 <em><a href="https://arxiv.org/abs/1803.00933" target="_blank" rel="noopener">Distributed Prioritized Experience Replay</a></em> 的基础上增加了 RNN 的支持，于是形成了本文要介绍的论文 <em><a href="https://pdfs.semanticscholar.org/8ede/7ddf99986d69562455bc8d69222fc3e27350.pdf" target="_blank" rel="noopener">Recurrent Experience Replay in Distributed Reinforcement Learning</a></em> 。论文主要讨论了由于使用经验池机制产生参数滞后 (parameter lag) 现象而导致的表征漂移 (representational drift) 和 RNN 隐藏状态滞后 (recurrent state staleness) 问题，这两个问题在分布式学习中更加显著。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/08/22/Recurrent-Experience-Replay-In-Distributed-Reinforcement-Learning/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1332,7 +1359,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">56</span>
+          <span class="site-state-item-count">57</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

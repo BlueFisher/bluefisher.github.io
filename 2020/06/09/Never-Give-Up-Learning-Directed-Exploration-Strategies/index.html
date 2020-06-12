@@ -19,25 +19,20 @@
     var CONFIG = {"hostname":"bluefisher.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="Deep Q-Network (DQN) 算法在 Q-Learning  算法的基础上，利用 深度卷积神经网络来逼近值函数，将强化学习与深度学习相结合，估计出最优行为价值函数 (optimal action-value function) \[ Q^*(s,a) &#x3D; \max_\pi \mathbb{E}[G_t|s_t&#x3D;s, a_t&#x3D;a, \pi] \] 然而通过深度学习的视角来进行强化学习">
+  <meta name="description" content="Never Give Up: Learning Directed Exploration Strategies 是 DeepMind 在 ICLR 2020 上发表的一篇论文，主要解决探索与利用问题。这篇论文可以看作是三篇论文的结合：  Curiosity-driven Exploration by Self-supervised Prediction Neural Episodic Con">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Deep Q-Network">
-<meta property="og:url" content="https://bluefisher.github.io/2018/05/07/Deep-Q-Network/index.html">
+<meta property="og:title" content="Never Give Up: Learning Directed Exploration Strategies">
+<meta property="og:url" content="https://bluefisher.github.io/2020/06/09/Never-Give-Up-Learning-Directed-Exploration-Strategies/index.html">
 <meta property="og:site_name" content="Fisher&#39;s Blog">
-<meta property="og:description" content="Deep Q-Network (DQN) 算法在 Q-Learning  算法的基础上，利用 深度卷积神经网络来逼近值函数，将强化学习与深度学习相结合，估计出最优行为价值函数 (optimal action-value function) \[ Q^*(s,a) &#x3D; \max_\pi \mathbb{E}[G_t|s_t&#x3D;s, a_t&#x3D;a, \pi] \] 然而通过深度学习的视角来进行强化学习">
+<meta property="og:description" content="Never Give Up: Learning Directed Exploration Strategies 是 DeepMind 在 ICLR 2020 上发表的一篇论文，主要解决探索与利用问题。这篇论文可以看作是三篇论文的结合：  Curiosity-driven Exploration by Self-supervised Prediction Neural Episodic Con">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://bluefisher.github.io/images/2018-05-07-Deep-Q-Network/q-learning.png">
-<meta property="og:image" content="https://bluefisher.github.io/images/2018-05-07-Deep-Q-Network/dqn.png">
-<meta property="og:image" content="https://bluefisher.github.io/images/2018-05-07-Deep-Q-Network/C6ypxs.png">
-<meta property="article:published_time" content="2018-05-07T13:22:01.000Z">
-<meta property="article:modified_time" content="2018-12-30T13:10:12.000Z">
+<meta property="article:published_time" content="2020-06-09T12:16:00.000Z">
+<meta property="article:modified_time" content="2020-06-12T15:27:51.097Z">
 <meta property="article:author" content="Fisher Chang">
-<meta property="article:tag" content="RL">
-<meta property="article:tag" content="DQN">
+<meta property="article:tag" content="rl">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://bluefisher.github.io/images/2018-05-07-Deep-Q-Network/q-learning.png">
 
-<link rel="canonical" href="https://bluefisher.github.io/2018/05/07/Deep-Q-Network/">
+<link rel="canonical" href="https://bluefisher.github.io/2020/06/09/Never-Give-Up-Learning-Directed-Exploration-Strategies/">
 
 
 <script id="page-configurations">
@@ -50,7 +45,7 @@
   };
 </script>
 
-  <title>Deep Q-Network | Fisher's Blog</title>
+  <title>Never Give Up: Learning Directed Exploration Strategies | Fisher's Blog</title>
   
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-124171741-1"></script>
     <script>
@@ -186,7 +181,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2018/05/07/Deep-Q-Network/">
+    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2020/06/09/Never-Give-Up-Learning-Directed-Exploration-Strategies/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
@@ -199,7 +194,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Deep Q-Network
+          Never Give Up: Learning Directed Exploration Strategies
         </h1>
 
         <div class="post-meta">
@@ -209,14 +204,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2018-05-07 21:22:01" itemprop="dateCreated datePublished" datetime="2018-05-07T21:22:01+08:00">2018-05-07</time>
+              <time title="创建时间：2020-06-09 20:16:00" itemprop="dateCreated datePublished" datetime="2020-06-09T20:16:00+08:00">2020-06-09</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2018-12-30 21:10:12" itemprop="dateModified" datetime="2018-12-30T21:10:12+08:00">2018-12-30</time>
+                <time title="修改时间：2020-06-12 23:27:51" itemprop="dateModified" datetime="2020-06-12T23:27:51+08:00">2020-06-12</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -229,7 +224,7 @@
             </span>
 
           
-            <span id="/2018/05/07/Deep-Q-Network/" class="post-meta-item leancloud_visitors" data-flag-title="Deep Q-Network" title="阅读次数">
+            <span id="/2020/06/09/Never-Give-Up-Learning-Directed-Exploration-Strategies/" class="post-meta-item leancloud_visitors" data-flag-title="Never Give Up: Learning Directed Exploration Strategies" title="阅读次数">
               <span class="post-meta-item-icon">
                 <i class="fa fa-eye"></i>
               </span>
@@ -244,8 +239,8 @@
       </span>
       <span class="post-meta-item-text">Valine：</span>
     
-    <a title="valine" href="/2018/05/07/Deep-Q-Network/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2018/05/07/Deep-Q-Network/" itemprop="commentCount"></span>
+    <a title="valine" href="/2020/06/09/Never-Give-Up-Learning-Directed-Exploration-Strategies/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/06/09/Never-Give-Up-Learning-Directed-Exploration-Strategies/" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -260,59 +255,41 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p><strong>Deep Q-Network (DQN)</strong> 算法在 <a href="https://bluefisher.github.io/2018/05/22/%E6%97%A0%E6%A8%A1%E5%9E%8B%E6%8E%A7%E5%88%B6-Model-Free-Control/">Q-Learning</a>  算法的基础上，利用 <strong>深度卷积神经网络来逼近值函数</strong>，将强化学习与深度学习相结合，估计出最优行为价值函数 (optimal action-value function) <span class="math display">\[
-Q^*(s,a) = \max_\pi \mathbb{E}[G_t|s_t=s, a_t=a, \pi]
-\]</span> 然而通过深度学习的视角来进行强化学习面临着许多问题，一个是深度学习程序需要大量的人为标记的数据，但强化学习通常需要在大量稀疏的、延迟的、带有噪声的奖励数值中学习。另一个问题是大多数深度学习算法都需要假定数据样本之间是独立的，但强化学习的数据是一连串高度关联的序列。</p>
-<p>为了解决这些问题，DQN 算法利用了 <strong>经验回放机制</strong> 和 <strong>设置目标网络与评估网络</strong> 。</p>
-<p>有两篇论文提出了 DQN 算法，分别是：</p>
-<blockquote>
+        <p><em>Never Give Up: Learning Directed Exploration Strategies</em> 是 DeepMind 在 ICLR 2020 上发表的一篇论文，主要解决探索与利用问题。这篇论文可以看作是三篇论文的结合：</p>
 <ol type="1">
-<li><em>Mnih V, Kavukcuoglu K, Silver D, et al. Playing Atari with Deep Reinforcement Learning[J]. Computer Science, 2013.</em></li>
-<li><em>Mnih V, Kavukcuoglu K, Silver D, et al. Human-level control through deep reinforcement learning[J]. Nature, 2015, 518(7540):529.</em></li>
+<li>Curiosity-driven Exploration by Self-supervised Prediction</li>
+<li>Neural Episodic Control</li>
+<li>Exploration by Random Network Distillation</li>
 </ol>
-</blockquote>
-<p>后一篇论文比前一篇多了目标、评估网络的特性。</p>
-<a id="more"></a>
-<h1 id="q-learning">Q-Learning</h1>
-<p>无模型控制 (Model-Free Control) 算法 Q-Learning 即为遵循异策略 (off-policy) 的 Sarsa 算法，下一个行为的选择遵循行为策略 (behavior policy) <span class="math inline">\(A_{t+1} \sim \mu (\cdot|S_t)\)</span>，而另一种继任的行为的选择遵循目标策略 (target policy) <span class="math inline">\(A&#39; \sim \pi (\cdot|S_t)\)</span>，以此得到更新过程： <span class="math display">\[
-Q(S_t,A_t) \leftarrow Q(S_t,A_t) + \alpha (R_{t+1} + \gamma Q(S_{t+1}, A&#39;) - Q(S_t, A_t))
-\]</span> 其中 target policy 对于 <span class="math inline">\(Q(s,a)\)</span> 采用贪婪策略 <span class="math display">\[
-\DeclareMathOperator*{\argmax}{argmax}
-\pi(S_{t+1}) = \argmax_{a&#39;} Q(S_{t+1},a&#39;)
-\]</span> behavior pllicy对于 <span class="math inline">\(Q(s,a)\)</span> 采用 <em>ϵ-greddy</em> 策略，所以 Q-Learning 的目标函数简化为： <span class="math display">\[
-\begin{align*}
-R_{t+1} + \gamma Q(S_{t+1}, A&#39;) &amp;= R_{t+1} + \gamma Q(S_{t+1}, \argmax_{a&#39;}Q(S_{t+1},a&#39;)) \\
-&amp;= R_{t+1} + \max_{a&#39;}\gamma Q(S_{t+1},a&#39;)
-\end{align*}
-\]</span> 所以 Q-Learning 控制算法为： <span class="math display">\[
-Q(S,A) \leftarrow Q(S,A) + \alpha \left(  R + \gamma \max_{a&#39;}Q(S&#39;, a&#39;) - Q(S,A)  \right)
-\]</span> 伪代码：</p>
-<p><img src="/images/2018-05-07-Deep-Q-Network/q-learning.png" /></p>
-<h1 id="dqn">DQN</h1>
-<h2 id="值函数近似-value-function-approximation">值函数近似 Value Function Approximation</h2>
-<p>行为价值函数的近似，即使用： <span class="math display">\[
-\hat{q}(S,A,w) \approx q_\pi(S,A)
-\]</span> 最小化近似行为函数<span class="math inline">\(\hat{q}(S,A,w)\)</span> 和真实值 <span class="math inline">\(q_\pi(S,A)\)</span> 的均方误差： <span class="math display">\[
-J(w) = \mathbb{E}_\pi [(q_\pi(S,A) - \hat{q}(S,A,w))^2]
-\]</span> 而对于一个 Q-network，在论文中记为： <span class="math display">\[
-L_i(\theta_i) = \mathbb{E}_{s,a,r}\left[ \big(y_i-Q(s,a; \theta_i)\big)^2 \right]
-\]</span> 其中 <span class="math inline">\(y_i=\mathbb{E}_{s&#39;}[r+\gamma\max_{a&#39;}Q(s&#39;,a&#39;;\theta_{i-1})]\)</span>，所以对于参数 <span class="math inline">\(\theta_i\)</span> 的梯度为： <span class="math display">\[
-\nabla_{\theta_i}L_i(\theta_i)=\mathbb{E}_{s,a,r,s&#39;} \left[ \left(r+\gamma\max_{a&#39;}Q(s&#39;,a&#39;;\theta_{i-1}) -Q(s,a;\theta_i) \right) \nabla_{\theta_i}Q(s,a;\theta_i)  \right]
+<p>也是使用内在奖励 (intrinsic reward) 机制，与外部奖励 (external reward) 合起来作为奖励值进行强化学习的训练。</p>
+<h1 id="never-give-up">Never Give Up</h1>
+<p>论文中 intrinsic reward 的主要思想很简单，主要有两部分组成：单个 episode 中的新颖程度 (per-episode novelty) 和整个训练阶段的新颖程度 (life-long novelty)。Episode novelty 鼓励智能体能周期性地在不同 episodes 之间访问相同的状态，但不鼓励在同一 episode 中访问相同的状态。而 life-long novelty 则逐渐降低不同 episodes 之间访问相同状态的新颖性。</p>
+<p>Episode novelty 主要用论文 <em>Neural Episodic Control</em> 中的 episodic memory 来解决，其中的 embedding network 主要用 <em>Curiosity-driven Exploration by Self-supervised Prediction</em> 方法，life-long novelty 则使用论文 <em>Exploration by Random Network Distillation</em> 中的 Random Network Distillation 来解决。</p>
+<h2 id="embedding-network">Embedding network</h2>
+<p><span class="math inline">\(f: \mathcal{O}\rightarrow\mathbb{R}^p\)</span> 将当前的观测值映射到维度是 <span class="math inline">\(p\)</span> 的向量中。映射的训练方法就是 <em>Curiosity-driven Exploration by Self-supervised Prediction</em> 中给定 <span class="math inline">\(t\)</span> 与 <span class="math inline">\(t+1\)</span> 时刻的两个观测值，预测观测值转移时所做的动作 <span class="math inline">\(p\left(a | x_{t}, x_{t+1}\right)=h\left(f\left(x_{t}\right), f\left(x_{t+1}\right)\right)\)</span> ，在这个预测的训练过程中训练这个映射。</p>
+<h2 id="episodic-memory-and-intrinsic-reward">Episodic memory and intrinsic reward</h2>
+<p>Episodic memory <span class="math inline">\(M\)</span> 就是一个动态的储存 embedding 后状态的缓冲区 <span class="math inline">\(\left\{f\left(x_{0}\right), f\left(x_{1}\right), \ldots, f\left(x_{t-1}\right)\right\}\)</span> 。</p>
+<p>Intrinsic reward 定义为：</p>
+<p><span class="math display">\[
+r_{t}^{\text {episodic }}=\frac{1}{\sqrt{n\left(f\left(x_{t}\right)\right)}} \approx \frac{1}{\sqrt{\sum_{f_{i} \in N_{k}} K\left(f\left(x_{t}\right), f_{i}\right)}+c}
 \]</span></p>
-<h2 id="经验回放-experience-replay">经验回放 Experience Replay</h2>
-<p>直接从连续的样本中学习效率很低，因为前后样本之间存在着很强的关联性，然而随机抽样则可以打破这些关联以此来减小训练的方差。另外对于同策略学习，现有的参数决定着参数更新所需要的下一个样本，这样就很容易产生一些不想要的事件循环，使得参数更新困在局部最优点甚至无法收敛，但经验回放可以使下一步的行为分布基于之前许许多多的状态而平均化，避免学习结果震荡或发散</p>
-<p>保存每一步的“经验” <span class="math inline">\(e_t=(s_t,a_t,r_t,s_{t+1})\)</span> 于集合 <span class="math inline">\(\mathcal{D}_t = \{e_1, \cdots, e_t\}\)</span> 中，每一次更新学习中，都从经验集合里进行随机抽样取出一定数量的样本进行 mini-batch 训练。在实际开发中，只需要在集合中存储最近的 <span class="math inline">\(N​\)</span> 次经验就可以，像队列一样如果集合满了就先进先出，以此可以得到第一篇论文中的算法伪代码：</p>
-<p><img src="/images/2018-05-07-Deep-Q-Network/dqn.png" /></p>
-<h2 id="目标神经网络-target-network">目标神经网络 Target Network</h2>
-<p>为了更进一步增强运用了神经网络的 Q-Learning 方法的稳定性，第二篇论文中提出了用一个分离的神经网络 <span class="math inline">\(\hat{Q}\)</span> 来生成目标 <span class="math inline">\(y_i\)</span> ，成为目标网络 (target network)。在每一次的迭代过程中，将 <span class="math inline">\(r+\gamma\max_{a&#39;} Q^*(s&#39;,a&#39;)\)</span> 用旧参数 <span class="math inline">\(\theta^-\)</span>固定下来 <span class="math inline">\(r+\gamma\max_{a&#39;} \hat{Q}(s&#39;,a&#39;;\theta_i^-)\)</span> ，经过 <span class="math inline">\(C\)</span> 趟训练之后，将原有更新过后的网络 <span class="math inline">\(Q\)</span> 的参数复制给目标网络 <span class="math inline">\(\hat Q\)</span> ，修改后的伪代码为：</p>
-<p><img src="/images/2018-05-07-Deep-Q-Network/C6ypxs.png" /></p>
+<p><span class="math inline">\(n\left(f\left(x_{t}\right)\right)\)</span> 表示状态 <span class="math inline">\(f\left(x_{t}\right)\)</span> 访问过的次数，我们用核函数 <span class="math inline">\(K: \mathbb{R}^{p} \times \mathbb{R}^{p} \rightarrow \mathbb{R}\)</span> 来表示该状态与其他状态的相似度之和，以此来近似 <span class="math inline">\(n\left(f\left(x_{t}\right)\right)\)</span> 。在实际中，与 <em>Neural Episodic Control</em> 相同，用 KNN 来计算 <span class="math inline">\(f(x_t)\)</span> 在 <span class="math inline">\(M\)</span> 中 <span class="math inline">\(k\)</span> 个最近状态，用 <span class="math inline">\(N_{k}=\left\{f_{i}\right\}_{i=1}^{k}\)</span> 表示。<span class="math inline">\(c\)</span> 是一个小常数。<span class="math inline">\(K\)</span> 是一个逆核： <span class="math display">\[
+K(x, y)=\frac{\epsilon}{\frac{d^{2}(x, y)}{d_{m}^{2}}+\epsilon}
+\]</span> <span class="math inline">\(\epsilon\)</span> 也是一个小常数，<span class="math inline">\(d\)</span> 是欧拉距离，<span class="math inline">\(d^2_m\)</span> 是 <span class="math inline">\(k\)</span> 个最近状态的平方欧拉距离的平均值。</p>
+<h2 id="integrating-life-long-curiosity">Integrating life-long curiosity</h2>
+<p>Life-long curiosity 即是在 intrinsic reward 的基础上增加了一个动态系数 <span class="math inline">\(\alpha_t\)</span>： <span class="math display">\[
+r_{t}^{i}=r_{t}^{\text {episodic }} \cdot \min \left\{\max \left\{\alpha_{t}, 1\right\}, L\right\}
+\]</span> 这个系数代表当前状态有多新颖，用的是 <em>Exploration by Random Network Distillation</em> 方法。该方法也非常简单，任意选定一个随机的、权值固定不变的网络 <span class="math inline">\(g: \mathcal{O} \rightarrow \mathbb{R}^{k}\)</span> 和一个预测网络 <span class="math inline">\(\hat{g}: \mathcal{O} \rightarrow \mathbb{R}^{k}\)</span> 。让这个预测网络尽可能接近随机网络： <span class="math display">\[
+\operatorname{err}\left(x_{t}\right)=\left\|\hat{g}\left(x_{t} ; \theta\right)-g\left(x_{t}\right)\right\|^{2}
+\]</span></p>
+<p><span class="math display">\[
+\alpha_{t}=1+\frac{\operatorname{err}\left(x_{t}\right)-\mu_{e}}{\sigma_{e}}
+\]</span></p>
+<p>其中 <span class="math inline">\(\sigma_e, \mu_e\)</span> 是 <span class="math inline">\(\operatorname{err}\left(x_{t}\right)\)</span> 的动态标准差和均值。</p>
 <h1 id="参考">参考</h1>
-<p>Sutton, R. &amp; Barto, A. Reinforcement Learning: An Introduction (MIT Press, 1998).</p>
-<p>Mnih V, Kavukcuoglu K, Silver D, et al. Playing Atari with Deep Reinforcement Learning[J]. Computer Science, 2013.</p>
-<p>Mnih V, Kavukcuoglu K, Silver D, et al. Human-level control through deep reinforcement learning[J]. Nature, 2015, 518(7540):529.</p>
-<p><a href="https://morvanzhou.github.io/tutorials/machine-learning/reinforcement-learning/4-1-A-DQN/" target="_blank" rel="noopener" class="uri">https://morvanzhou.github.io/tutorials/machine-learning/reinforcement-learning/4-1-A-DQN/</a></p>
-<p><a href="https://zhuanlan.zhihu.com/p/28108498" target="_blank" rel="noopener" class="uri">https://zhuanlan.zhihu.com/p/28108498</a></p>
-<p><a href="https://zhuanlan.zhihu.com/p/28223841" target="_blank" rel="noopener" class="uri">https://zhuanlan.zhihu.com/p/28223841</a></p>
+<p>Badia, A. P., Sprechmann, P., Vitvitskyi, A., Guo, D., Piot, B., Kapturowski, S., ... &amp; Blundell, C. (2020). Never Give Up: Learning Directed Exploration Strategies. <em>arXiv preprint arXiv:2002.06038</em>.</p>
+<p>Pritzel, A., Uria, B., Srinivasan, S., Badia, A. P., Vinyals, O., Hassabis, D., ... &amp; Blundell, C. (2017, August). Neural episodic control. In <em>Proceedings of the 34th International Conference on Machine Learning-Volume 70</em> (pp. 2827-2836). JMLR. org.</p>
+<p>Burda, Y., Edwards, H., Storkey, A., &amp; Klimov, O. (2018). Exploration by random network distillation. <em>arXiv preprint arXiv:1810.12894</em>.</p>
 
     </div>
 
@@ -348,7 +325,7 @@ L_i(\theta_i) = \mathbb{E}_{s,a,r}\left[ \big(y_i-Q(s,a; \theta_i)\big)^2 \right
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://bluefisher.github.io/2018/05/07/Deep-Q-Network/" title="Deep Q-Network">https://bluefisher.github.io/2018/05/07/Deep-Q-Network/</a>
+    <a href="https://bluefisher.github.io/2020/06/09/Never-Give-Up-Learning-Directed-Exploration-Strategies/" title="Never Give Up: Learning Directed Exploration Strategies">https://bluefisher.github.io/2020/06/09/Never-Give-Up-Learning-Directed-Exploration-Strategies/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -359,8 +336,7 @@ L_i(\theta_i) = \mathbb{E}_{s,a,r}\left[ \big(y_i-Q(s,a; \theta_i)\big)^2 \right
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/RL/" rel="tag"># RL</a>
-              <a href="/tags/DQN/" rel="tag"># DQN</a>
+              <a href="/tags/rl/" rel="tag"># rl</a>
           </div>
 
         
@@ -369,13 +345,10 @@ L_i(\theta_i) = \mathbb{E}_{s,a,r}\left[ \big(y_i-Q(s,a; \theta_i)\big)^2 \right
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2018/05/07/%E6%90%AD%E5%BB%BAshadowsocks%E6%9C%8D%E5%8A%A1%E5%99%A8/" rel="prev" title="搭建shadowsocks服务器">
-      <i class="fa fa-chevron-left"></i> 搭建shadowsocks服务器
+    <a href="/2020/06/03/CURL-Contrastive-Unsupervised-Representations-for-Reinforcement-Learning/" rel="prev" title="CURL: Contrastive Unsupervised Representations for Reinforcement Learning">
+      <i class="fa fa-chevron-left"></i> CURL: Contrastive Unsupervised Representations for Reinforcement Learning
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2018/05/08/DQN-%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/" rel="next" title="DQN 代码实现">
-      DQN 代码实现 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -435,7 +408,7 @@ L_i(\theta_i) = \mathbb{E}_{s,a,r}\left[ \big(y_i-Q(s,a; \theta_i)\big)^2 \right
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#q-learning"><span class="nav-number">1.</span> <span class="nav-text">Q-Learning</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#dqn"><span class="nav-number">2.</span> <span class="nav-text">DQN</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#值函数近似-value-function-approximation"><span class="nav-number">2.1.</span> <span class="nav-text">值函数近似 Value Function Approximation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#经验回放-experience-replay"><span class="nav-number">2.2.</span> <span class="nav-text">经验回放 Experience Replay</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#目标神经网络-target-network"><span class="nav-number">2.3.</span> <span class="nav-text">目标神经网络 Target Network</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#never-give-up"><span class="nav-number">1.</span> <span class="nav-text">Never Give Up</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#embedding-network"><span class="nav-number">1.1.</span> <span class="nav-text">Embedding network</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#episodic-memory-and-intrinsic-reward"><span class="nav-number">1.2.</span> <span class="nav-text">Episodic memory and intrinsic reward</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#integrating-life-long-curiosity"><span class="nav-number">1.3.</span> <span class="nav-text">Integrating life-long curiosity</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">2.</span> <span class="nav-text">参考</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
