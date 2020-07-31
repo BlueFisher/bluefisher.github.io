@@ -28,8 +28,9 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://bluefisher.github.io/images/2020-07-28-Evolution-Strategies-as-a-Scalable-Alternative-to-Reinforcement-Learning/image-20200728205016411.png">
 <meta property="og:image" content="https://bluefisher.github.io/images/2020-07-28-Evolution-Strategies-as-a-Scalable-Alternative-to-Reinforcement-Learning/image-20200729085726182.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-07-28-Evolution-Strategies-as-a-Scalable-Alternative-to-Reinforcement-Learning/image-20200731153201870.png">
 <meta property="article:published_time" content="2020-07-28T09:05:22.000Z">
-<meta property="article:modified_time" content="2020-07-29T01:21:04.944Z">
+<meta property="article:modified_time" content="2020-07-31T07:34:22.578Z">
 <meta property="article:author" content="Fisher Chang">
 <meta property="article:tag" content="rl">
 <meta property="article:tag" content="es">
@@ -215,7 +216,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-07-29 09:21:04" itemprop="dateModified" datetime="2020-07-29T09:21:04+08:00">2020-07-29</time>
+                <time title="修改时间：2020-07-31 15:34:22" itemprop="dateModified" datetime="2020-07-31T15:34:22+08:00">2020-07-31</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -285,8 +286,12 @@
 <p>ES 方法很容易扩展到多个并行的 workers 上，因为它需要建立在完整的 episode 基础上，因此 workers 之间的通讯不频繁，同时如果每个 worker 知道其他 worker 的初始随机种子是什么，那么 workers 之间传递的信息只是一个 episode 的回报标量，非常节省带宽。</p>
 <p>简单的并行 ES 版本如下，主要创新点是利用了已知的随机种子：</p>
 <p><img src="/images/2020-07-28-Evolution-Strategies-as-a-Scalable-Alternative-to-Reinforcement-Learning/image-20200729085726182.png" /></p>
-<p>在实际中，作者会事先为每个 worker 都生成一堆大量的高斯噪音，在训练的每个迭代中随机挑选一部分噪音加到策略的参数中。尽管这样每次迭代之间的噪音扰动不是完全独立的，但作者并没有发生很大的问题。另外当使用大量的并行 workers 或神经网络结构非常大时，每次可以只扰动一部分的 <span class="math inline">\(\theta\)</span> 。</p>
+<p>在实际中，作者会事先为每个 worker 都生成一堆大量的高斯噪音，在训练的每个迭代中随机挑选一部分噪音加到策略的参数中。尽管这样每次迭代之间的噪音扰动不是完全独立的，但作者并没有发现很大的问题。另外当使用大量的并行 workers 或神经网络结构非常大时，每次可以只扰动一部分的 <span class="math inline">\(\theta\)</span> 。</p>
 <p>为了减少方差，作者也使用了 autithetic sampling，也被称作 mirrored sampling，即评估扰动对 <span class="math inline">\(\epsilon, -\epsilon\)</span> 。除此之外，算法也使用了进化学习中的 fitness shaping，给每个回报排个序，加上一个顺序权重。</p>
+<h2 id="cross-entropy-method">Cross Entropy Method</h2>
+<p>在论文 <a href="http://proceedings.mlr.press/v97/hafner19a/hafner19a.pdf" target="_blank" rel="noopener">Learning Latent Dynamics for Planning from Pixels</a> 中，作者在基于模型的 planning 阶段也使用了一种基于种群的进化学习方法 cross entropy method (CEM) 。CEM 算法非常简单，初始化一个与时间有关的高斯分布表示最优动作序列 <span class="math inline">\(a_{t: t+H} \sim \operatorname{Normal}\left(\mu_{t: t+H}, \sigma_{t: t+H}^{2} \mathbb{I}\right)\)</span> ，其中 <span class="math inline">\(t\)</span> 表示当前 time step，<span class="math inline">\(H\)</span> 是 planning 的长度。从零均值、单位方差开始，重复地采样 <span class="math inline">\(J\)</span> 个动作序列，将他们放入到环境模型中进行评估，然后使用最佳的 <span class="math inline">\(K\)</span> 个动作序列来更新高斯分布。在 <span class="math inline">\(I\)</span> 次迭代过后，返回当前步的高斯的均值 <span class="math inline">\(\mu_t\)</span> 作为动作才真正地交给环境与环境交互。收到下个观测值后，动作的高斯分布重新置为零均值、单位方差，以避免陷入局部最优。整体算法如下：</p>
+<p><img src="/images/2020-07-28-Evolution-Strategies-as-a-Scalable-Alternative-to-Reinforcement-Learning/image-20200731153201870.png" /></p>
+<p>这里因为已经有了环境模型，所以可以快速地生成一个完整的 planning 序列，选取 <span class="math inline">\(K\)</span> 个最优的序列是简单地计算每个序列的累积奖励，再进行排序。</p>
 <h2 id="参考">参考</h2>
 <p>https://lilianweng.github.io/lil-log/2019/09/05/evolution-strategies.html</p>
 <p>Salimans, T., Ho, J., Chen, X., Sidor, S., &amp; Sutskever, I. (2017). Evolution strategies as a scalable alternative to reinforcement learning. <em>arXiv preprint arXiv:1703.03864</em>.</p>
@@ -409,7 +414,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#es-的规模化与并行化"><span class="nav-number">1.</span> <span class="nav-text">ES 的规模化与并行化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">2.</span> <span class="nav-text">参考</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#es-的规模化与并行化"><span class="nav-number">1.</span> <span class="nav-text">ES 的规模化与并行化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cross-entropy-method"><span class="nav-number">2.</span> <span class="nav-text">Cross Entropy Method</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
