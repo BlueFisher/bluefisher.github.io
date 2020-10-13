@@ -180,6 +180,108 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2018/05/25/Prioritized-Experience-Replay/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
+      <meta itemprop="name" content="Fisher Chang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fisher's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/05/25/Prioritized-Experience-Replay/" class="post-title-link" itemprop="url">Prioritized Experience Replay</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-05-25 00:00:00" itemprop="dateCreated datePublished" datetime="2018-05-25T00:00:00+08:00">2018-05-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2018-12-30 21:15:45" itemprop="dateModified" datetime="2018-12-30T21:15:45+08:00">2018-12-30</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Reinforcement-Learning/" itemprop="url" rel="index"><span itemprop="name">Reinforcement Learning</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/05/25/Prioritized-Experience-Replay/" class="post-meta-item leancloud_visitors" data-flag-title="Prioritized Experience Replay" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/05/25/Prioritized-Experience-Replay/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/05/25/Prioritized-Experience-Replay/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在之前的 <a href="https://bluefisher.github.io/2018/05/07/Deep-Q-Network/">Deep Q-Network</a> 中，引入了经验回放机制，在经验记忆 (replay memory) 中均匀地选取的经验片段 (replay transition) ，但是这种简单等概率的选取经验片段的方法忽视了每条片段的重要程度。所以在论文 <em>Prioritized Experience Replay</em> 中，提出了一种优先经验的方法，将一些比较重要的经验片段回放的频率高一点，从而使得学习更有效率。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/05/25/Prioritized-Experience-Replay/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2018/05/22/%E6%97%A0%E6%A8%A1%E5%9E%8B%E6%8E%A7%E5%88%B6-Model-Free-Control/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1124,110 +1226,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2018/05/16/Deterministic-Policy-Gradient/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
-      <meta itemprop="name" content="Fisher Chang">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Fisher's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/05/16/Deterministic-Policy-Gradient/" class="post-title-link" itemprop="url">Deterministic Policy Gradient</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2018-05-16 10:42:32" itemprop="dateCreated datePublished" datetime="2018-05-16T10:42:32+08:00">2018-05-16</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2018-12-11 09:56:09" itemprop="dateModified" datetime="2018-12-11T09:56:09+08:00">2018-12-11</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Reinforcement-Learning/" itemprop="url" rel="index"><span itemprop="name">Reinforcement Learning</span></a>
-                </span>
-            </span>
-
-          
-            <span id="/2018/05/16/Deterministic-Policy-Gradient/" class="post-meta-item leancloud_visitors" data-flag-title="Deterministic Policy Gradient" title="阅读次数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span class="leancloud-visitors-count"></span>
-            </span>
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="fa fa-comment-o"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2018/05/16/Deterministic-Policy-Gradient/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2018/05/16/Deterministic-Policy-Gradient/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>在 <em>Deterministic Policy Gradient Algorithms</em> 一文中，DeepMind 在原有随机策略梯度 (Stochastic Policy Gradient) 算法的基础上介绍了确定性策略梯度算法 (Deterministic Policy Gradient Algorithms DPG) 来解决连续性决策问题，是之后 Deep DPG (DDPG) 算法的基础。</p>
-<p>传统的策略梯度算法以概率形式 <span class="math inline">\(\pi_\theta(a|s) = \mathbb{P}[a|s; \theta]\)</span> 来表示一个策略，以此来随机的选择行为。但 DPG 用一种确定性的策略形式 <span class="math inline">\(a=\mu_\theta(s)\)</span> 。</p>
-<p>DPG 有着比 PG 更简单的形式：行为价值函数的期望，这也使得 DPG 比 PG 更加有效，同时在高维度行为空间中也比 PG 表现得更加好。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/05/16/Deterministic-Policy-Gradient/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1299,7 +1297,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">59</span>
+          <span class="site-state-item-count">60</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
