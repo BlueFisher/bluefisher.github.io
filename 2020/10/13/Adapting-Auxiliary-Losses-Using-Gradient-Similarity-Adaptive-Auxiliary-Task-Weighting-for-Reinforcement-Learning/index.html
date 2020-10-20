@@ -27,8 +27,9 @@
 <meta property="og:description" content="在强化学习中， 一直存在数据利用率低的问题，尤其是在观测值是高维图像的情况下。如果引入一些额外的辅助任务，将这些任务的知识迁移到强化学习主任务中是一个可以提高数据利用率的方法，同时也能帮助提高强化学习的基础表征，但如何将这些辅助任务进行融合是一个大问题，因为不确定这些辅助任务是否真的在帮助主任务，也不知道它们何时会对主任务的训练产生反作用。 Adapting Auxiliary Losses U">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://bluefisher.github.io/images/2020-10-13-Adapting-Auxiliary-Losses-Using-Gradient-Similarity-Adaptive-Auxiliary-Task-Weighting-for-Reinforcement-Learning/image-20201013145417869.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-10-13-Adapting-Auxiliary-Losses-Using-Gradient-Similarity-Adaptive-Auxiliary-Task-Weighting-for-Reinforcement-Learning/image-20201019221623238.png">
 <meta property="article:published_time" content="2020-10-13T02:39:45.000Z">
-<meta property="article:modified_time" content="2020-10-13T07:36:10.100Z">
+<meta property="article:modified_time" content="2020-10-20T01:08:09.435Z">
 <meta property="article:author" content="Fisher Chang">
 <meta property="article:tag" content="RL">
 <meta name="twitter:card" content="summary">
@@ -205,10 +206,16 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2020-10-13 10:39:45 / 修改时间：15:36:10" itemprop="dateCreated datePublished" datetime="2020-10-13T10:39:45+08:00">2020-10-13</time>
+              <time title="创建时间：2020-10-13 10:39:45" itemprop="dateCreated datePublished" datetime="2020-10-13T10:39:45+08:00">2020-10-13</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-20 09:08:09" itemprop="dateModified" datetime="2020-10-20T09:08:09+08:00">2020-10-20</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
@@ -281,12 +288,64 @@
 <p>上述命题假设所有损失具有相同的参数 <span class="math inline">\(\theta\)</span> ，但公式 (2) 假设每种任务还有独有的参数 <span class="math inline">\(\phi_{main}, \phi_{aux}\)</span> ，所以需要以下命题：</p>
 <blockquote>
 <p>给定参数为 <span class="math inline">\(\Theta\)</span> 的两种损失（某些参数为共享参数 <span class="math inline">\(\theta\)</span> ，某些为独有参数 <span class="math inline">\(\phi_{main}, \phi_{aux}\)</span>），参数更新形式 <span class="math display">\[
-\boldsymbol{\theta}^{(t+1)}:=\boldsymbol{\theta}^{(t)}-\alpha^{(t)}\left(\nabla_{\boldsymbol{\theta}} \mathcal{L}_{\operatorname{main}}\left(\boldsymbol{\theta}^{(t)}\right)+\nabla_{\boldsymbol{\theta}} \mathcal{L}_{a u x}\left(\boldsymbol{\theta}^{(t)}\right) \max \left(0, \cos \left(\nabla_{\boldsymbol{\theta}} \mathcal{L}_{\operatorname{main}}\left(\boldsymbol{\theta}^{(t)}\right), \nabla_{\boldsymbol{\theta}} \mathcal{L}_{a u x}\left(\boldsymbol{\theta}^{(t)}\right)\right)\right)\right.\\
-\phi_{\text {main}}^{(t+1)}:=\phi_{\text {main}}^{(t)}-\alpha^{(t)} \nabla_{\boldsymbol{\phi}_{\text {main}}} \mathcal{L}_{\operatorname{main}}\left(\boldsymbol{\Theta}^{(t)}\right) \quad \text { and } \quad \boldsymbol{\phi}_{a u x}^{(t+1)}:=\boldsymbol{\phi}_{a u x}^{(t)}-\alpha^{(t)} \nabla_{\boldsymbol{\phi}_{a u x}} \mathcal{L}_{a u x}\left(\boldsymbol{\Theta}^{(t)}\right)
+\begin{align*}
+\boldsymbol{\theta}^{(t+1)} &amp;:= \boldsymbol{\theta}^{(t)}-\alpha^{(t)}\bigg(\nabla_{\boldsymbol{\theta}} \mathcal{L}_{\operatorname{main}}\left(\boldsymbol{\theta}^{(t)}\right)+\nabla_{\boldsymbol{\theta}} \mathcal{L}_{a u x}\left(\boldsymbol{\theta}^{(t)}\right)
+{
+\color{red}\max \Big( 0, \cos \left(\nabla_{\boldsymbol{\theta}} \mathcal{L}_{\operatorname{main}}\left(\boldsymbol{\theta}^{(t)}\right), \nabla_{\boldsymbol{\theta}} \mathcal{L}_{a u x}\left(\boldsymbol{\theta}^{(t)}\right)\right)\Big)
+}
+\bigg) \\
+\phi_{\text {main}}^{(t+1)} &amp;:= \phi_{\text {main}}^{(t)}-\alpha^{(t)} \nabla_{\boldsymbol{\phi}_{\text {main}}} \mathcal{L}_{\operatorname{main}}\left(\boldsymbol{\Theta}^{(t)}\right) \quad \text { and } \quad \boldsymbol{\phi}_{a u x}^{(t+1)}:=\boldsymbol{\phi}_{a u x}^{(t)}-\alpha^{(t)} \nabla_{\boldsymbol{\phi}_{a u x}} \mathcal{L}_{a u x}\left(\boldsymbol{\Theta}^{(t)}\right)
+\end{align*}
 \]</span> 可以收敛到 <span class="math inline">\(\mathcal{L}_{main}\)</span> 的局部最优点上。</p>
 </blockquote>
 <p>与第一个命题先比较，即将 <span class="math inline">\(G=\nabla_{\boldsymbol{\theta}} \mathcal{L}_{\text {main}}\)</span> ， <span class="math inline">\(V=\nabla_{\boldsymbol{\theta}} \mathcal{L}_{a u x}\)</span> 。</p>
 <p>对于算法的无权重版本该命题依然成立，我们可以不以 <span class="math inline">\(\cos(G,V)\)</span> 作为权重，而是用二值权重 <span class="math inline">\((\text{sign}(\cos(G,V))+1)/2\)</span> ，即当 <span class="math inline">\(\cos(G,V)&gt;0\)</span> 时使用 <span class="math inline">\(V\)</span> 。</p>
+<h1 id="adaptive-auxiliary-task-weighting-for-reinforcement-learning">Adaptive Auxiliary Task Weighting for Reinforcement Learning</h1>
+<h2 id="问题定义-1">问题定义</h2>
+<p>这篇论文的符号使用与前文比较类似，假设有一个主任务 <span class="math inline">\(\mathcal{T}_{main}\)</span> 和一系列辅助任务 <span class="math inline">\(\mathcal{T}_{aux,i}\)</span> ，其中 <span class="math inline">\(i\in \{1,2,\cdots,K\}\)</span> ，并分别对应损失 <span class="math inline">\(\mathcal{L}_{main}\)</span> 和 <span class="math inline">\(\mathcal{L}_{aux,i}\)</span> 。将主任务与辅助任务损失融合后变成： <span class="math display">\[
+\mathcal{L}\left(\theta_{t}\right)=\mathcal{L}_{\operatorname{main}}\left(\theta_{t}\right)+\sum_{i=1}^{K} w_{i} \mathcal{L}_{a u x, i}\left(\theta_{t}\right)
+\]</span> 即辅助任务损失前加了权重 <span class="math inline">\(w_i\)</span> ，模型参数更新公式为： <span class="math display">\[
+\theta_{t+1}=\theta_{t}-\alpha \nabla_{\theta_{t}} \mathcal{L}\left(\theta_{t}\right)
+\]</span></p>
+<h2 id="local-update-from-one-step-gradient">Local Update from One-step Gradient</h2>
+<p>我们首先去寻找能使主任务损失下降的最快的辅助权重。定义 <span class="math inline">\(\mathcal{V}_t(\boldsymbol{w})\)</span> 为主任务损失在 <span class="math inline">\(t\)</span> 时刻下降的速度，其中 <span class="math inline">\(\boldsymbol{w}=[w_1, \cdots, w_k]^{T}\)</span> ，可以有： <span class="math display">\[
+\begin{aligned}
+\mathcal{V}_{t}(\boldsymbol{w})=\frac{d \mathcal{L}_{\operatorname{main}}\left(\theta_{t}\right)}{d t} &amp; \approx \mathcal{L}_{\operatorname{main}}\left(\theta_{t+1}\right)-\mathcal{L}_{\operatorname{main}}\left(\theta_{t}\right) \\
+&amp;=\mathcal{L}_{\operatorname{main}}\left(\theta_{t}-\alpha \nabla_{\theta_{t}} \mathcal{L}\left(\theta_{t}\right)\right)-\mathcal{L}_{\operatorname{main}}\left(\theta_{t}\right) \\
+&amp; \approx \mathcal{L}_{\operatorname{main}}\left(\theta_{t}\right)-\alpha \nabla_{\theta_{t}} \mathcal{L}_{\operatorname{main}}\left(\theta_{t}\right)^{T} \nabla_{\theta_{t}} \mathcal{L}\left(\theta_{t}\right)-\mathcal{L}_{\operatorname{main}}\left(\theta_{t}\right) \\
+&amp;=-\alpha \nabla_{\theta_{t}} \mathcal{L}_{\operatorname{main}}\left(\theta_{t}\right)^{T} \nabla_{\theta_{t}} \mathcal{L}\left(\theta_{t}\right)
+\end{aligned} \tag{3}
+\]</span> <span class="math inline">\(\alpha\)</span> 是梯度步长。第一行公式是从时间导数的有限差分近似中获得的，即 <span class="math inline">\(\Delta t=1\)</span> ，第三行公式是一阶泰勒近似。</p>
+<p>要更新 <span class="math inline">\(\boldsymbol{w}\)</span> ，我们可以简单地计算它的梯度： <span class="math display">\[
+\frac{\partial \mathcal{V}_{t}\left(w_{i}\right)}{\partial w_{i}}=-\alpha \nabla_{\theta_{t}} \mathcal{L}_{\operatorname{main}}\left(\theta_{t}\right)^{T} \nabla_{\theta_{t}} \mathcal{L}_{a u x, i}\left(\theta_{t}\right), \forall i=1, \ldots, K \tag{4}
+\]</span> 实际上就是主任务损失梯度与辅助任务损失梯度的点积。从直观上来讲，这个方法利用了在线更新过程中经验来判断辅助任务是否真的在帮助降低主任务损失。这就很想上文的余弦相似度方法来判断是否要去用某个辅助任务，但是此更新公式是基于最大化主任务损失下降速度，实验证明这个方法比用余弦近似会更好。</p>
+<h2 id="n-step-update">N-step Update</h2>
+<p>公式 4 的的梯度实际上是公式 3 中的顺时更新 <span class="math inline">\(d \mathcal{L}_{\operatorname{main}}\left(\theta_{t}\right) / dt\)</span> ，但我们不仅仅需要关注 one-step 的主任务损失更新，更应该关注主任务损失在多步之后的长远更新。所以我们现在优化主任务损失的 N-step 下降速度： <span class="math display">\[
+\mathcal{V}_{t}^{N}(\boldsymbol{w})=\mathcal{L}_{\operatorname{main}}\left(\theta_{t+N}\right)-\mathcal{L}_{\operatorname{main}}\left(\theta_{t}\right)
+\]</span> 要计算上式关于 <span class="math inline">\(\boldsymbol{w}\)</span> 的梯度需要计算高阶雅各比矩阵，这非常消耗计算性能，所以作者只计算了一阶近似： <span class="math display">\[
+\begin{aligned}
+\mathcal{V}_{t}^{N}(\boldsymbol{w}) &amp; \doteq \mathcal{L}_{\operatorname{main}}\left(\theta_{t+N}\right)-\mathcal{L}_{\operatorname{main}}\left(\theta_{t}\right) \\
+&amp;=\mathcal{L}_{\operatorname{main}}\left(\theta_{t+N-1}-\alpha \nabla_{\theta_{t+N-1}} \mathcal{L}\left(\theta_{t+N-1}\right)\right)-\mathcal{L}_{\operatorname{main}}\left(\theta_{t}\right) \\
+&amp; \approx \mathcal{L}_{\operatorname{main}}\left(\theta_{t+N-1}\right)-\mathcal{L}_{\operatorname{main}}\left(\theta_{t}\right)-\alpha \nabla_{\theta_{t+N-1}} \mathcal{L}_{\operatorname{main}}\left(\theta_{t+N-1}\right)^{T} \nabla_{\theta_{t+N-1}} \mathcal{L}\left(\theta_{t+N-1}\right) \\
+&amp; \vdots \\
+&amp; \approx-\alpha \sum_{j=0}^{N-1} \nabla_{\theta_{t+j}} \mathcal{L}_{\operatorname{main}}\left(\theta_{t+j}\right)^{T} \nabla_{\theta_{t+j}} \mathcal{L}\left(\theta_{t+j}\right)
+\end{aligned}
+\]</span> 省略了其它高阶项后，一阶的梯度近似为： <span class="math display">\[
+\nabla_{w_{i}} \mathcal{V}_{t}^{N}\left(w_{i}\right) \approx-\alpha \sum_{j=0}^{N-1} \nabla_{\theta_{t+j}} \mathcal{L}_{\operatorname{main}}\left(\theta_{t+j}\right)^{T} \nabla_{\theta_{t+j}} \mathcal{L}_{a u x, i}\left(\theta_{t+j}\right) \tag{6}
+\]</span> 每个都是一个标量，更新权重 <span class="math inline">\(w_i\)</span> 。论文中，这个更新方式称之为 Online Learning for Auxiliary losses (OL-AUX) 。在实际中，为了平衡多个损失的梯度，作者使用了 Adaptive Loss Balancing 方法，即将所有辅助任务的损失都套了一个 log。下列展示了此算法：</p>
+<p><img src="/images/2020-10-13-Adapting-Auxiliary-Losses-Using-Gradient-Similarity-Adaptive-Auxiliary-Task-Weighting-for-Reinforcement-Learning/image-20201019221623238.png" /></p>
+<p>每 <span class="math inline">\(N\)</span> 次更新，就应用公式 6 更新权重。</p>
+<p>作者在实验部分尝试了五种辅助任务：</p>
+<ol type="1">
+<li>Forward Dynamics，给定当前时刻的观测值和动作，预测下一时刻的观测值的隐状态；</li>
+<li>Inverse Dynamics，给定连续的观测值，预测所执行的动作；</li>
+<li>Egomotion，给定原始图像和变换过后的图像，预测变换的方式；</li>
+<li>Autoencoder，从隐状态重建原始观测值；</li>
+<li>Optical Flow，给定连续的图像观测值，预测光流。</li>
+</ol>
+<h1 id="参考">参考</h1>
+<p>Du, Y., Czarnecki, W. M., Jayakumar, S. M., Pascanu, R., &amp; Lakshminarayanan, B. (2018). Adapting auxiliary losses using gradient similarity. <em>arXiv preprint arXiv:1812.02224</em>.</p>
+<p>Lin, X., Baweja, H., Kantor, G., &amp; Held, D. (2019). Adaptive Auxiliary Task Weighting for Reinforcement Learning. In <em>Advances in Neural Information Processing Systems</em> (pp. 4772-4783).</p>
 
     </div>
 
@@ -405,7 +464,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#adapting-auxiliary-losses-using-gradient-similarity"><span class="nav-number">1.</span> <span class="nav-text">Adapting Auxiliary Losses Using Gradient Similarity</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题定义"><span class="nav-number">1.1.</span> <span class="nav-text">问题定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#任务梯度之间的余弦相似度-cosine-similarity-between-gradients-of-tasks"><span class="nav-number">1.2.</span> <span class="nav-text">任务梯度之间的余弦相似度 (Cosine Similarity Between Gradients Of Tasks)</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#adapting-auxiliary-losses-using-gradient-similarity"><span class="nav-number">1.</span> <span class="nav-text">Adapting Auxiliary Losses Using Gradient Similarity</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题定义"><span class="nav-number">1.1.</span> <span class="nav-text">问题定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#任务梯度之间的余弦相似度-cosine-similarity-between-gradients-of-tasks"><span class="nav-number">1.2.</span> <span class="nav-text">任务梯度之间的余弦相似度 (Cosine Similarity Between Gradients Of Tasks)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#adaptive-auxiliary-task-weighting-for-reinforcement-learning"><span class="nav-number">2.</span> <span class="nav-text">Adaptive Auxiliary Task Weighting for Reinforcement Learning</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题定义-1"><span class="nav-number">2.1.</span> <span class="nav-text">问题定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#local-update-from-one-step-gradient"><span class="nav-number">2.2.</span> <span class="nav-text">Local Update from One-step Gradient</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#n-step-update"><span class="nav-number">2.3.</span> <span class="nav-text">N-step Update</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
