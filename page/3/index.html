@@ -180,6 +180,108 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2019/01/02/Distributed-Prioritized-Experience-Replay/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
+      <meta itemprop="name" content="Fisher Chang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fisher's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/01/02/Distributed-Prioritized-Experience-Replay/" class="post-title-link" itemprop="url">Distributed Prioritized Experience Replay</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-01-02 21:09:33" itemprop="dateCreated datePublished" datetime="2019-01-02T21:09:33+08:00">2019-01-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-01-03 11:02:36" itemprop="dateModified" datetime="2019-01-03T11:02:36+08:00">2019-01-03</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Reinforcement-Learning/" itemprop="url" rel="index"><span itemprop="name">Reinforcement Learning</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2019/01/02/Distributed-Prioritized-Experience-Replay/" class="post-meta-item leancloud_visitors" data-flag-title="Distributed Prioritized Experience Replay" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2019/01/02/Distributed-Prioritized-Experience-Replay/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2019/01/02/Distributed-Prioritized-Experience-Replay/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>DeepMind 在 ICLR 上发表了 <a href="http://arxiv.org/abs/1803.00933" target="_blank" rel="noopener">Distributed Prioritized Experience Replay</a> ，可以让强化学习算法更有效地利用大规模数据。文章的思想很简单，算法将强化学习分为行为产生器 actor 和学习器 learner ，每个 actor 独立的与环境进行交互，但行为根据一个共享的网络生成，然后将累积的经验存在共享的经验池 experience replay memory 中；learner 从经验池中采样经验并进行学习，然后更新共享的神经网络参数。整个架构建立在 prioritized experience replay 的基础上。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/01/02/Distributed-Prioritized-Experience-Replay/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2018/12/29/Python-%E4%B8%8E-Unity-mlagents-%E4%BA%A4%E4%BA%92-API/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1102,112 +1204,10 @@ y_j=r_j+\gamma\max_{a_j&#39;}Q_{\phi&#39;}(s_j&#39;,a_j&#39;)
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2018/08/03/Memory-Based-Control-With-Recurrent-Neural-Networks/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
-      <meta itemprop="name" content="Fisher Chang">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Fisher's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/08/03/Memory-Based-Control-With-Recurrent-Neural-Networks/" class="post-title-link" itemprop="url">Memory-Based Control With Recurrent Neural Networks</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2018-08-03 10:18:24" itemprop="dateCreated datePublished" datetime="2018-08-03T10:18:24+08:00">2018-08-03</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2018-12-30 21:23:48" itemprop="dateModified" datetime="2018-12-30T21:23:48+08:00">2018-12-30</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Reinforcement-Learning/" itemprop="url" rel="index"><span itemprop="name">Reinforcement Learning</span></a>
-                </span>
-            </span>
-
-          
-            <span id="/2018/08/03/Memory-Based-Control-With-Recurrent-Neural-Networks/" class="post-meta-item leancloud_visitors" data-flag-title="Memory-Based Control With Recurrent Neural Networks" title="阅读次数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span class="leancloud-visitors-count"></span>
-            </span>
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="fa fa-comment-o"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2018/08/03/Memory-Based-Control-With-Recurrent-Neural-Networks/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2018/08/03/Memory-Based-Control-With-Recurrent-Neural-Networks/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>部分可观察环境的马尔可夫决策过程 (partially-observed Markov Decision process POMDP) 是强化学习中的一个非常具有挑战性的部分，在 <em>Memory-Based Control With Recurrent Neural Networks</em> 这篇论文中，作者使用了长短时记忆的循环神经网络并扩展了确定性策略梯度 (deterministic policy gradient) 与随机价值梯度 (stochastic value gradient) 两种方法分别称为 RDPG 和 RSVG(0) 来解决 POMDP 问题。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/08/03/Memory-Based-Control-With-Recurrent-Neural-Networks/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1275,7 +1275,7 @@ y_j=r_j+\gamma\max_{a_j&#39;}Q_{\phi&#39;}(s_j&#39;,a_j&#39;)
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">60</span>
+          <span class="site-state-item-count">61</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
