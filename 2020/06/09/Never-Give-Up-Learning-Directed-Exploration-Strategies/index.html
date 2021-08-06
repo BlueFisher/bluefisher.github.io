@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-logo.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-logo.png">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"bluefisher.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Never Give Up: Learning Directed Exploration Strategies 是 DeepMind 在 ICLR 2020 上发表的一篇论文，主要解决探索与利用问题。这篇论文可以看作是三篇论文的结合：  Curiosity-driven Exploration by Self-supervised Prediction Neural Episodic Con">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Never Give Up: Learning Directed Exploration Strategies">
+<meta property="og:url" content="https://bluefisher.github.io/2020/06/09/Never-Give-Up-Learning-Directed-Exploration-Strategies/index.html">
+<meta property="og:site_name" content="Fisher&#39;s Blog">
+<meta property="og:description" content="Never Give Up: Learning Directed Exploration Strategies 是 DeepMind 在 ICLR 2020 上发表的一篇论文，主要解决探索与利用问题。这篇论文可以看作是三篇论文的结合：  Curiosity-driven Exploration by Self-supervised Prediction Neural Episodic Con">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-06-09T12:16:00.000Z">
+<meta property="article:modified_time" content="2020-06-12T15:57:12.459Z">
+<meta property="article:author" content="Fisher Chang">
+<meta property="article:tag" content="rl">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://bluefisher.github.io/2020/06/09/Never-Give-Up-Learning-Directed-Exploration-Strategies/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Never Give Up: Learning Directed Exploration Strategies | Fisher's Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-124171741-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-124171741-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?553ac1673540f93b43866b93cc2d3efe";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Fisher's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Sein heißt Werden<br/>Leben heißt Lernen</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/BlueFisher" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2020/06/09/Never-Give-Up-Learning-Directed-Exploration-Strategies/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
+      <meta itemprop="name" content="Fisher Chang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fisher's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Never Give Up: Learning Directed Exploration Strategies
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-06-09 20:16:00" itemprop="dateCreated datePublished" datetime="2020-06-09T20:16:00+08:00">2020-06-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-12 23:57:12" itemprop="dateModified" datetime="2020-06-12T23:57:12+08:00">2020-06-12</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Reinforcement-Learning/" itemprop="url" rel="index"><span itemprop="name">Reinforcement Learning</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/06/09/Never-Give-Up-Learning-Directed-Exploration-Strategies/" class="post-meta-item leancloud_visitors" data-flag-title="Never Give Up: Learning Directed Exploration Strategies" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/06/09/Never-Give-Up-Learning-Directed-Exploration-Strategies/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/06/09/Never-Give-Up-Learning-Directed-Exploration-Strategies/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><em>Never Give Up: Learning Directed Exploration Strategies</em> 是 DeepMind 在 ICLR 2020 上发表的一篇论文，主要解决探索与利用问题。这篇论文可以看作是三篇论文的结合：</p>
+<ol type="1">
+<li>Curiosity-driven Exploration by Self-supervised Prediction</li>
+<li>Neural Episodic Control</li>
+<li>Exploration by Random Network Distillation</li>
+</ol>
+<p>也是使用内在奖励 (intrinsic reward) 机制，与外部奖励 (external reward) 合起来作为奖励值进行强化学习的训练。</p>
+<a id="more"></a>
+<h1 id="never-give-up">Never Give Up</h1>
+<p>论文中 intrinsic reward 的主要思想很简单，主要有两部分组成：单个 episode 中的新颖程度 (per-episode novelty) 和整个训练阶段的新颖程度 (life-long novelty)。Episode novelty 鼓励智能体能周期性地在不同 episodes 之间访问相同的状态，但不鼓励在同一 episode 中访问相同的状态。而 life-long novelty 则逐渐降低不同 episodes 之间访问相同状态的新颖性。</p>
+<p>Episode novelty 主要用论文 <em>Neural Episodic Control</em> 中的 episodic memory 来解决，其中的 embedding network 主要用 <em>Curiosity-driven Exploration by Self-supervised Prediction</em> 方法，life-long novelty 则使用论文 <em>Exploration by Random Network Distillation</em> 中的 Random Network Distillation 来解决。</p>
+<h2 id="embedding-network">Embedding network</h2>
+<p><span class="math inline">\(f: \mathcal{O}\rightarrow\mathbb{R}^p\)</span> 将当前的观测值映射到维度是 <span class="math inline">\(p\)</span> 的向量中。映射的训练方法就是 <em>Curiosity-driven Exploration by Self-supervised Prediction</em> 中给定 <span class="math inline">\(t\)</span> 与 <span class="math inline">\(t+1\)</span> 时刻的两个观测值，预测观测值转移时所做的动作 <span class="math inline">\(p\left(a | x_{t}, x_{t+1}\right)=h\left(f\left(x_{t}\right), f\left(x_{t+1}\right)\right)\)</span> ，在这个预测的训练过程中训练这个映射。</p>
+<h2 id="episodic-memory-and-intrinsic-reward">Episodic memory and intrinsic reward</h2>
+<p>Episodic memory <span class="math inline">\(M\)</span> 就是一个动态的储存 embedding 后状态的缓冲区 <span class="math inline">\(\left\{f\left(x_{0}\right), f\left(x_{1}\right), \ldots, f\left(x_{t-1}\right)\right\}\)</span> 。</p>
+<p>Intrinsic reward 定义为：</p>
+<p><span class="math display">\[
+r_{t}^{\text {episodic }}=\frac{1}{\sqrt{n\left(f\left(x_{t}\right)\right)}} \approx \frac{1}{\sqrt{\sum_{f_{i} \in N_{k}} K\left(f\left(x_{t}\right), f_{i}\right)}+c}
+\]</span></p>
+<p><span class="math inline">\(n\left(f\left(x_{t}\right)\right)\)</span> 表示状态 <span class="math inline">\(f\left(x_{t}\right)\)</span> 访问过的次数，我们用核函数 <span class="math inline">\(K: \mathbb{R}^{p} \times \mathbb{R}^{p} \rightarrow \mathbb{R}\)</span> 来表示该状态与其他状态的相似度之和，以此来近似 <span class="math inline">\(n\left(f\left(x_{t}\right)\right)\)</span> 。在实际中，与 <em>Neural Episodic Control</em> 相同，用 KNN 来计算 <span class="math inline">\(f(x_t)\)</span> 在 <span class="math inline">\(M\)</span> 中 <span class="math inline">\(k\)</span> 个最近状态，用 <span class="math inline">\(N_{k}=\left\{f_{i}\right\}_{i=1}^{k}\)</span> 表示。<span class="math inline">\(c\)</span> 是一个小常数。<span class="math inline">\(K\)</span> 是一个逆核： <span class="math display">\[
+K(x, y)=\frac{\epsilon}{\frac{d^{2}(x, y)}{d_{m}^{2}}+\epsilon}
+\]</span> <span class="math inline">\(\epsilon\)</span> 也是一个小常数，<span class="math inline">\(d\)</span> 是欧拉距离，<span class="math inline">\(d^2_m\)</span> 是 <span class="math inline">\(k\)</span> 个最近状态的平方欧拉距离的平均值。</p>
+<h2 id="integrating-life-long-curiosity">Integrating life-long curiosity</h2>
+<p>Life-long curiosity 即是在 intrinsic reward 的基础上增加了一个动态系数 <span class="math inline">\(\alpha_t\)</span>： <span class="math display">\[
+r_{t}^{i}=r_{t}^{\text {episodic }} \cdot \min \left\{\max \left\{\alpha_{t}, 1\right\}, L\right\}
+\]</span> 这个系数代表当前状态有多新颖，用的是 <em>Exploration by Random Network Distillation</em> 方法。该方法也非常简单，任意选定一个随机的、权值固定不变的网络 <span class="math inline">\(g: \mathcal{O} \rightarrow \mathbb{R}^{k}\)</span> 和一个预测网络 <span class="math inline">\(\hat{g}: \mathcal{O} \rightarrow \mathbb{R}^{k}\)</span> 。让这个预测网络尽可能接近随机网络： <span class="math display">\[
+\operatorname{err}\left(x_{t}\right)=\left\|\hat{g}\left(x_{t} ; \theta\right)-g\left(x_{t}\right)\right\|^{2}
+\]</span></p>
+<p><span class="math display">\[
+\alpha_{t}=1+\frac{\operatorname{err}\left(x_{t}\right)-\mu_{e}}{\sigma_{e}}
+\]</span></p>
+<p>其中 <span class="math inline">\(\sigma_e, \mu_e\)</span> 是 <span class="math inline">\(\operatorname{err}\left(x_{t}\right)\)</span> 的动态标准差和均值。</p>
+<h1 id="参考">参考</h1>
+<p>Badia, A. P., Sprechmann, P., Vitvitskyi, A., Guo, D., Piot, B., Kapturowski, S., ... &amp; Blundell, C. (2020). Never Give Up: Learning Directed Exploration Strategies. <em>arXiv preprint arXiv:2002.06038</em>.</p>
+<p>Pritzel, A., Uria, B., Srinivasan, S., Badia, A. P., Vinyals, O., Hassabis, D., ... &amp; Blundell, C. (2017, August). Neural episodic control. In <em>Proceedings of the 34th International Conference on Machine Learning-Volume 70</em> (pp. 2827-2836). JMLR. org.</p>
+<p>Burda, Y., Edwards, H., Storkey, A., &amp; Klimov, O. (2018). Exploration by random network distillation. <em>arXiv preprint arXiv:1810.12894</em>.</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/wechatpay.jpg" alt="Fisher Chang 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/alipay.jpg" alt="Fisher Chang 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Fisher Chang
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://bluefisher.github.io/2020/06/09/Never-Give-Up-Learning-Directed-Exploration-Strategies/" title="Never Give Up: Learning Directed Exploration Strategies">https://bluefisher.github.io/2020/06/09/Never-Give-Up-Learning-Directed-Exploration-Strategies/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/rl/" rel="tag"># rl</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/06/03/CURL-Contrastive-Unsupervised-Representations-for-Reinforcement-Learning/" rel="prev" title="CURL: Contrastive Unsupervised Representations for Reinforcement Learning">
+      <i class="fa fa-chevron-left"></i> CURL: Contrastive Unsupervised Representations for Reinforcement Learning
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/07/28/Evolution-Strategies-as-a-Scalable-Alternative-to-Reinforcement-Learning/" rel="next" title="Evolution Strategies as a Scalable Alternative to Reinforcement Learning">
+      Evolution Strategies as a Scalable Alternative to Reinforcement Learning <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#never-give-up"><span class="nav-number">1.</span> <span class="nav-text">Never Give Up</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#embedding-network"><span class="nav-number">1.1.</span> <span class="nav-text">Embedding network</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#episodic-memory-and-intrinsic-reward"><span class="nav-number">1.2.</span> <span class="nav-text">Episodic memory and intrinsic reward</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#integrating-life-long-curiosity"><span class="nav-number">1.3.</span> <span class="nav-text">Integrating life-long curiosity</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">2.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Fisher Chang"
+      src="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
+  <p class="site-author-name" itemprop="name">Fisher Chang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">62</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BlueFisher" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BlueFisher" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/4909165/fish-tree" title="StackOverflow → https:&#x2F;&#x2F;stackoverflow.com&#x2F;users&#x2F;4909165&#x2F;fish-tree" rel="noopener" target="_blank"><i class="fa fa-fw fa-stack-overflow"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://ai.stackexchange.com/users/15525/fish-tree" title="AI.StackExchange → https:&#x2F;&#x2F;ai.stackexchange.com&#x2F;users&#x2F;15525&#x2F;fish-tree" rel="noopener" target="_blank"><i class="fa fa-fw fa-stack-exchange"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blue.fisher.zzy@gmail.com" title="E-Mail → mailto:blue.fisher.zzy@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title">
+      <i class="fa fa-fw fa-link"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://stepneverstop.github.io/" title="https:&#x2F;&#x2F;stepneverstop.github.io&#x2F;" rel="noopener" target="_blank">Keavnn</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fisher Chang</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : '7ruImtbdRTEUvc3qxbGlSc0t-gzGzoHsz',
+      appKey     : 'Vbun7eF790Szhvl9qKC0CCsm',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

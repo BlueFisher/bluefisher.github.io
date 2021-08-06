@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-logo.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-logo.png">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"bluefisher.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="无模型的深度强化学习 (model-free deep reinforcement learning) 算法尽管非常多，效果也不错，但由于异策略采样与神经网络这种高维非线性函数近似的结合，使得 DRL 一直会有两个非常大的问题：采样复杂度大、对超参数非常敏感。在 Soft Actor-Critic Algorithms and Applications 论文中，伯克利与 Google Brain">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Soft Actor-Critic">
+<meta property="og:url" content="https://bluefisher.github.io/2019/03/22/Soft-Actor-Critic/index.html">
+<meta property="og:site_name" content="Fisher&#39;s Blog">
+<meta property="og:description" content="无模型的深度强化学习 (model-free deep reinforcement learning) 算法尽管非常多，效果也不错，但由于异策略采样与神经网络这种高维非线性函数近似的结合，使得 DRL 一直会有两个非常大的问题：采样复杂度大、对超参数非常敏感。在 Soft Actor-Critic Algorithms and Applications 论文中，伯克利与 Google Brain">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://bluefisher.github.io/images/2019-03-22-Soft-Actor-Critic/1553519092887.png">
+<meta property="article:published_time" content="2019-03-22T02:22:50.000Z">
+<meta property="article:modified_time" content="2019-07-23T08:05:54.000Z">
+<meta property="article:author" content="Fisher Chang">
+<meta property="article:tag" content="RL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://bluefisher.github.io/images/2019-03-22-Soft-Actor-Critic/1553519092887.png">
+
+<link rel="canonical" href="https://bluefisher.github.io/2019/03/22/Soft-Actor-Critic/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Soft Actor-Critic | Fisher's Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-124171741-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-124171741-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?553ac1673540f93b43866b93cc2d3efe";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Fisher's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Sein heißt Werden<br/>Leben heißt Lernen</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/BlueFisher" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2019/03/22/Soft-Actor-Critic/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
+      <meta itemprop="name" content="Fisher Chang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fisher's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Soft Actor-Critic
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-03-22 10:22:50" itemprop="dateCreated datePublished" datetime="2019-03-22T10:22:50+08:00">2019-03-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-07-23 16:05:54" itemprop="dateModified" datetime="2019-07-23T16:05:54+08:00">2019-07-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Reinforcement-Learning/" itemprop="url" rel="index"><span itemprop="name">Reinforcement Learning</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2019/03/22/Soft-Actor-Critic/" class="post-meta-item leancloud_visitors" data-flag-title="Soft Actor-Critic" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2019/03/22/Soft-Actor-Critic/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2019/03/22/Soft-Actor-Critic/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>无模型的深度强化学习 (model-free deep reinforcement learning) 算法尽管非常多，效果也不错，但由于异策略采样与神经网络这种高维非线性函数近似的结合，使得 DRL 一直会有两个非常大的问题：采样复杂度大、对超参数非常敏感。在 <em><a href="https://arxiv.org/abs/1812.05905" target="_blank" rel="noopener">Soft Actor-Critic Algorithms and Applications</a></em> 论文中，伯克利与 Google Brain 联合提出了 Soft Actor-Critic，一种基于最大熵强化学习框架的异策略 actor-critic 算法。SAC 非常的稳定，可以在不同初始权重的情况下得到取得相同的性能。SAC 有三个显著的特点：</p>
+<ol type="1">
+<li>策略与值函数分离的 actor-critic 框架</li>
+<li>异策略采样可以更有效地复用历史采集到的数据</li>
+<li>熵的最大化可以让算法更稳定，同时还能鼓励探索，找到多个都是最优的 near-optimal 行为。</li>
+</ol>
+<p>最大熵强化学习可以参考 <a href="https://bluefisher.github.io/2018/11/13/Reinforcement-Learning-with-Deep-Energy-Based-Policies/">Reinforcement Learning with Deep Energy-Based Policies</a> 。<em><a href="https://arxiv.org/abs/1801.01290" target="_blank" rel="noopener">Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor</a></em> 实际上最先提出了 SAC 算法，但本篇论文在此基础上做了一定的修改，尤其是改进了对 temperature hyperparmeter 敏感的问题。完整代码可见 <a href="https://github.com/BlueFisher/RL-SAC-with-Unity" target="_blank" rel="noopener">https://github.com/BlueFisher/RL-SAC-with-Unity</a>.</p>
+<a id="more"></a>
+<p>标准的强化学习目标函数是期望奖励的总和： <span class="math display">\[
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\st}{s_t}
+\newcommand{\at}{a_t}
+\newcommand{\sT}{s_T}
+\newcommand{\aT}{a_T}
+\newcommand{\stp}{s_{t+1}}
+\newcommand{\atp}{a_{t+1}}
+\sum_t \E_{(\st,\at)\sim\rho_\pi}\left[{r(\st,\at)}\right]
+\]</span></p>
+<p>我们的目标就是找到一个策略 <span class="math inline">\(\pi\)</span> 来最大化该目标函数。而最大熵目标函数增加了一项熵，最优策略则增加了在每一状态下最大化熵： <span class="math display">\[
+\newcommand{\ent}{\mathcal{H}}
+\pi^* = \arg\max_{\pi} \sum_{t} \E_{(\st, \at) \sim \rho_\pi}\left[{r(\st,\at) + \alpha\ent(\pi(\cdot|\st))}\right]
+\]</span></p>
+<p>其中 <span class="math inline">\(\alpha\)</span> 就是 temperature parameter ，决定了相对于奖励值来说，熵的重要程度。</p>
+<h1 id="soft-policy-iteration">Soft Policy Iteration</h1>
+<p>论文先在表格形式的情况下证明了带有最大化熵的 policy iteration 是能保证收敛。Policy iteration 分为 policy evaluation 和 policy improvement 两个过程。</p>
+<h2 id="soft-policy-evaluation">Soft Policy Evaluation</h2>
+<p>soft Q-value 用贝尔曼期望可以迭代地写成： <span class="math display">\[
+\mathcal{T}^\pi Q(\st, \at) \triangleq  r(\st, \at) + \gamma \E_{s_{t+1} \sim p}\left[{V(s_{t+1})}\right] \tag{1}
+\]</span> 其中 <span class="math display">\[
+\begin{align*}
+V(\st) &amp;= \E_{\at\sim\pi}\left[{Q(\st, \at) - \alpha\log\pi(\at|\st)}\right] \\
+&amp;= \E_{\at\sim\pi}\left[Q(\st, \at)\right] + \alpha\ent(\pi(\cdot|\st))
+\end{align*} \tag{2}
+\]</span> 为 soft state value function。可以导出以下soft policy evaluation 定理，即 Q function 一定会收敛：</p>
+<blockquote>
+<p>Consider the soft Bellman backup operator <span class="math inline">\(\mathcal{T}^\pi\)</span> in (1) and a mapping <span class="math inline">\(Q^0: \mathcal{S} \times \mathcal{A}\rightarrow \mathbb{R}\)</span> with <span class="math inline">\(|\mathcal{A}|&lt;\infty\)</span>, and define <span class="math inline">\(Q^{k+1} = \mathcal{T}^\pi Q^k\)</span>. Then the sequence <span class="math inline">\(Q^k\)</span> will converge to the soft Q-function of <span class="math inline">\(\pi\)</span> as <span class="math inline">\(k\rightarrow \infty\)</span>.</p>
+</blockquote>
+<h2 id="soft-policy-improvement">Soft Policy Improvement</h2>
+<p>对于当前策略下的最优 Q function，接下去的策略改进过程则是要找到一个新策略 <span class="math inline">\(\pi&#39;\)</span> 使 <span class="math inline">\(\pi&#39;\)</span> 与 soft Q-function 的 KL 散度最小。关于 soft Q-function 可参见 soft Q-learning (SQL)。 <span class="math display">\[
+\pi_\mathrm{new} = \arg\underset{\pi&#39;\in \Pi}{\min} D_\mathrm{KL}\left({\pi&#39;(\cdot|\st)} \Bigg{|}\Bigg{|} {\frac{\exp\left(\frac{1}{\alpha}Q^{\pi_\mathrm{old}}(\st, \cdot)\right)}{Z^{\pi_\mathrm{old}}(\st)}}\right) \tag{3}
+\]</span> 分母的配分函数 <span class="math inline">\(Z^{\pi_\mathrm{old}}(\st)\)</span> 将 Q 函数分布进行标准化。尽管它在实际训练过程中是无法计算的，但它并不参与到梯度的传播中，所以可以忽略。我们将策略改进正式定义为：</p>
+<blockquote>
+<p>Let <span class="math inline">\(\pi _\mathrm{old} \in \Pi\)</span> and let <span class="math inline">\(\pi _\mathrm{new}\)</span> be the optimizer of the minimization problem defined in (3). Then <span class="math inline">\(Q^{\pi_\mathrm{new}}(\st, \at) \geq Q^{\pi_\mathrm{old}}(\st, \at)\)</span> for all <span class="math inline">\((\st, \at) \in \mathcal{S}\times\mathcal{A}\)</span> with <span class="math inline">\(|\mathcal{A}|&lt;\infty\)</span>.</p>
+</blockquote>
+<p>将 soft policy evaluation 与 improvement 结合可以得到 soft policy iteration 定理：</p>
+<blockquote>
+<p>Repeated application of soft policy evaluation and soft policy improvement from any <span class="math inline">\(\pi\in\Pi\)</span> converges to a policy <span class="math inline">\(\pi ^*\)</span> such that <span class="math inline">\(Q^{\pi^*}(\st, \at) \geq Q^{\pi}(\st, \at)\)</span> for all <span class="math inline">\(\pi \in \Pi\)</span> and <span class="math inline">\((\st, \at) \in \mathcal{S}\times\mathcal{A}\)</span>, assuming <span class="math inline">\(|\mathcal{A}|&lt;\infty\)</span>.</p>
+</blockquote>
+<h1 id="soft-actor-critic">Soft Actor-Critic</h1>
+<p>上节是在表格形式下的理论推导，在实际操作过程中肯定还是需要对 soft Q-function 和 policy 进行值函数近似。我们用参数化的形式将 Q-function 定义为 <span class="math inline">\(Q_\theta(\st,\at)\)</span> ，policy 为 <span class="math inline">\(\pi_\phi(\at|\st)\)</span> ，Q-function 可以为一个神经网络结构，policy 可以为由神经网络输出的均值与协方差矩阵。</p>
+<p>soft Q-function 的参数可以通过最小化 soft 贝尔曼方程来求得： <span class="math display">\[
+J_Q(\theta) = \E_{(\st, \at)\sim\mathcal{D}} \left[{\frac{1}{2}\left(Q_\theta(\st, \at) - \left(r(\st, \at) + \gamma \E_{\stp\sim p}\left[{V_{\bar\theta}(\stp)}\right]\right)\right)^2}\right]
+\]</span> 其中 value function 可以用公式 (2) 隐式地进行表示，这 <em><a href="https://arxiv.org/abs/1801.01290" target="_blank" rel="noopener">Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor</a></em> 这篇首次提出 SAC 的论文中，value function 是个独立的需要训练的网络，但作者发现原论文中这样做是不必要的。于是梯度为： <span class="math display">\[
+\hat \nabla_\theta J_Q(\theta) =  \nabla_\theta Q_\theta(\at, \st) \left(Q_\theta(\st, \at) - \left(r(\st,\at) + \gamma \left(Q_{\bar\theta}(\stp, \atp) - \alpha \log\left(\pi_\phi(\atp|\stp\right)\right)\right)\right) \tag{4}
+\]</span> 梯度更新过程中使用了 target soft Q-function ，用参数 <span class="math inline">\(\bar\theta\)</span> 表示。</p>
+<p>策略则可以直接用公式 (3) 进行更新（乘以了 <span class="math inline">\(\alpha\)</span> 并且忽略的常量对数配分函数 <span class="math inline">\(Z\)</span>）： <span class="math display">\[
+\begin{align*}
+J_\pi(\phi) &amp;= \alpha \int\pi&#39;(\cdot|\st) \log \left[{\frac{\pi&#39;(\cdot|\st)}{\exp\left(\frac{1}{\alpha}Q^{\pi_\mathrm{old}}(\st, \cdot)\right)/Z}}\right] \mathrm{d}s\mathrm{d}a \\
+&amp;= \E_{\st\sim\mathcal{D}}\left[{\E_{\at\sim\pi_\phi}\left[{\alpha \log\left(\pi_\phi(\at|\st)\right) - Q_\theta(\st, \at)}\right]}\right]
+\end{align*} \tag{5}
+\]</span> 有许多方法来最小化 <span class="math inline">\(J_\pi\)</span> ，比如经典的 REINFORCE 算法，它不需要将梯度在策略与目标概率密度网络中进行反向传播。但在 SAC 中，目标概率密度是用神经网络表示的 Q-function <span class="math inline">\(\exp\left(\frac{1}{\alpha}Q^{\pi_\mathrm{old}}(\st, \cdot)\right)/Z\)</span>，它可以求导，所以我们也可以方便地使用重参数方法来降低方差： <span class="math display">\[
+\at = f_\phi(\epsilon_t; \st)
+\]</span> 其中 <span class="math inline">\(\epsilon_t\)</span> 是输入的噪音向量，从一个固定的分布采样而来，比如高斯分布。我们将公式 (5) 修改为： <span class="math display">\[
+J_\pi(\phi) = \E_{\st\sim\mathcal{D},\epsilon_t\sim\mathcal{N}}\left[{\alpha \log \pi_\phi(f_\phi(\epsilon_t;\st)|\st) - Q_\theta(\st, f_\phi(\epsilon_t;\st))}\right]
+\]</span> 其中策略 <span class="math inline">\(\pi_\phi\)</span> 隐式地根据 <span class="math inline">\(f_\phi\)</span> 来表示。梯度则为： <span class="math display">\[
+\hat\nabla_\phi J_\pi(\phi) = \nabla_\phi \alpha \log\left( \pi_\phi(\at|\st)\right) + 
+\big( 
+\nabla_{\at} \alpha \log \left(\pi_\phi(\at|\st)\right) - \nabla_{\at} Q(\st, \at)
+\big) \nabla_\phi f_\phi(\epsilon_t;\st) \tag{6}
+\]</span> 这种更新方式类似于 DDPG，Q 中的 <span class="math inline">\(\at\)</span> 也进行梯度传导。</p>
+<h2 id="automating-entropy-adjustment-for-maximum-entropy-rl">Automating Entropy Adjustment for Maximum Entropy RL</h2>
+<p>在之前的小节中，我们都使用了固定了 temperature parameter <span class="math inline">\(\alpha\)</span> ，但 <span class="math inline">\(\alpha\)</span> 的选择是很困难的，对于不同的任务可能也需要不同的选择。为了解决这个问题，我们通过一个不同的最大化熵强化学习目标函数来将这个选择的过程自动化，此时的熵被视为一个常量。</p>
+<p>我们的目标就是找到一个随机策略来使累积期望回报最大，同时也要满足一个最小的期望熵。也就是说所有状态的熵的期望要大于某个常量，这样不同的状态的熵就可以不同： <span class="math display">\[
+\max_{\pi_{0:T}} \E_{\rho_\pi}\left[{\sum_{t=0}^T r(\st,\at)}\right] \text{ s.t. } \E_{(\st, \at)\sim\rho_\pi}\left[{-\log(\pi_t(\at|\st))}\right] \geq \mathcal{H}\ \ \forall t
+\]</span> 其中 <span class="math inline">\(\mathcal{H}\)</span> 就是这个最小的期望熵。</p>
+<p>因为此时 <span class="math inline">\(t\)</span> 的策略只会影响到未来的优化目标，所以可以使用动态规划方法，从后往前求解。写成迭代的形式为： <span class="math display">\[
+\max_{\pi_0} \left( \E_{}\left[{r(s, a_0)}\right] + \max_{\pi_1} \left( \E_{}\left[{ \ldots }\right] + \max_{\pi_T} \E_{}\left[{r(s_T, a_T)}\right] \right) \right)
+\]</span> 从最后一个时刻开始，我们将带约束的最大化问题转变为对偶问题。即约束 <span class="math inline">\(\E{(\sT, \aT)\sim\rho_\pi}{-\log(\pi_T(\sT|\sT))} \geq \mathcal{H}\)</span> 用拉格朗日乘数法变为： <span class="math display">\[
+\max_{\pi_T} \E_{(\st, \at)\sim\rho_\pi}\left[{r(s_T, a_T)}\right] = \min_{\alpha_T \geq 0} \max_{\pi_T} \E_{}\left[{r(s_T, a_T) - \alpha_T \log \pi(a_T|s_T)}\right] -\alpha_T \mathcal{H}
+\]</span> 其中 <span class="math inline">\(\alpha_T\)</span> 为拉格朗日乘子。这个对偶目标函数与最大化熵的目标函数在策略上有非常大的关系，最优策略实际上就是根据 <span class="math inline">\(\alpha_T\)</span> 而来的最大化熵策略：<span class="math inline">\(\pi_T^*(a_T | s_T; \alpha_T)\)</span> 。我们可以用下式来解得最优拉格朗日乘子 <span class="math inline">\(\alpha_T\)</span> ： <span class="math display">\[
+\arg \min_{\alpha_T} \E_{\st, \at\sim \pi_t^*}\left[{- \alpha_T\log\pi_T^*(a_T|s_T; \alpha_T) - \alpha_T \ent}\right]
+\]</span> 最后，经过一系列复杂的迭代过程， <span class="math inline">\(a_t^*\)</span> 可由下式得出： <span class="math display">\[
+\alpha_t^* = \arg \min_{\alpha_t} \E_{\at\sim \pi_t^*}\left[{- \alpha_t\log\pi_t^*(\at|\st; \alpha_t) - \alpha_t \bar\ent}\right]
+\]</span></p>
+<h2 id="practical-algorithm">Practical Algorithm</h2>
+<p>在实际过程中，为了减少在策略改进过程中的偏差，作者还使用了两个 soft Q-functions。在更新公式 (4) 与 (6) 时，使用最小的 Q-function 值。</p>
+<p>对于 <span class="math inline">\(\alpha_t\)</span> 的更新，作者使用了近似对偶梯度更新方法： <span class="math display">\[
+J(\alpha)  = \E_{\at\sim \pi_t}\left[{ - \alpha\log\pi_t(\at|\st) - \alpha \bar\ent}\right]
+\]</span> 最终算法为：</p>
+<p><img src="/images/2019-03-22-Soft-Actor-Critic/1553519092887.png" /></p>
+<h1 id="参考">参考</h1>
+<p>Haarnoja, Tuomas, Aurick Zhou, Kristian Hartikainen, George Tucker, Sehoon Ha, Jie Tan, Vikash Kumar, et al. “Soft Actor-Critic Algorithms and Applications.” ArXiv:1812.05905 [Cs, Stat], December 12, 2018. http://arxiv.org/abs/1812.05905.</p>
+<p>https://zhuanlan.zhihu.com/p/52526801</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/wechatpay.jpg" alt="Fisher Chang 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/alipay.jpg" alt="Fisher Chang 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Fisher Chang
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://bluefisher.github.io/2019/03/22/Soft-Actor-Critic/" title="Soft Actor-Critic">https://bluefisher.github.io/2019/03/22/Soft-Actor-Critic/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/RL/" rel="tag"># RL</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/02/08/Noisy-Networks-for-Exploration/" rel="prev" title="Noisy Networks for Exploration">
+      <i class="fa fa-chevron-left"></i> Noisy Networks for Exploration
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/06/01/Hindsight-Experience-Replay/" rel="next" title="Hindsight Experience Replay">
+      Hindsight Experience Replay <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#soft-policy-iteration"><span class="nav-number">1.</span> <span class="nav-text">Soft Policy Iteration</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#soft-policy-evaluation"><span class="nav-number">1.1.</span> <span class="nav-text">Soft Policy Evaluation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#soft-policy-improvement"><span class="nav-number">1.2.</span> <span class="nav-text">Soft Policy Improvement</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#soft-actor-critic"><span class="nav-number">2.</span> <span class="nav-text">Soft Actor-Critic</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#automating-entropy-adjustment-for-maximum-entropy-rl"><span class="nav-number">2.1.</span> <span class="nav-text">Automating Entropy Adjustment for Maximum Entropy RL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#practical-algorithm"><span class="nav-number">2.2.</span> <span class="nav-text">Practical Algorithm</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Fisher Chang"
+      src="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
+  <p class="site-author-name" itemprop="name">Fisher Chang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">62</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BlueFisher" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BlueFisher" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/4909165/fish-tree" title="StackOverflow → https:&#x2F;&#x2F;stackoverflow.com&#x2F;users&#x2F;4909165&#x2F;fish-tree" rel="noopener" target="_blank"><i class="fa fa-fw fa-stack-overflow"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://ai.stackexchange.com/users/15525/fish-tree" title="AI.StackExchange → https:&#x2F;&#x2F;ai.stackexchange.com&#x2F;users&#x2F;15525&#x2F;fish-tree" rel="noopener" target="_blank"><i class="fa fa-fw fa-stack-exchange"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blue.fisher.zzy@gmail.com" title="E-Mail → mailto:blue.fisher.zzy@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title">
+      <i class="fa fa-fw fa-link"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://stepneverstop.github.io/" title="https:&#x2F;&#x2F;stepneverstop.github.io&#x2F;" rel="noopener" target="_blank">Keavnn</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fisher Chang</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : '7ruImtbdRTEUvc3qxbGlSc0t-gzGzoHsz',
+      appKey     : 'Vbun7eF790Szhvl9qKC0CCsm',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-logo.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-logo.png">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"bluefisher.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文翻译自 Understanding Variational Autoencoders (VAEs), Joseph Rocca, Sep 24, 2019 这篇文章里，我们主要介绍一种深度生成模型：Variational Autoencoders (VAEs)。概括地说，VAE 就是一个自动编码器（autoencoder），但它编码后的分布在训练阶段需要被正则化，以此让它的隐空间（laten">
+<meta property="og:type" content="article">
+<meta property="og:title" content="理解 Variational Autoencoders (VAEs)">
+<meta property="og:url" content="https://bluefisher.github.io/2020/02/07/%E7%90%86%E8%A7%A3-Variational-Autoencoders-VAEs/index.html">
+<meta property="og:site_name" content="Fisher&#39;s Blog">
+<meta property="og:description" content="本文翻译自 Understanding Variational Autoencoders (VAEs), Joseph Rocca, Sep 24, 2019 这篇文章里，我们主要介绍一种深度生成模型：Variational Autoencoders (VAEs)。概括地说，VAE 就是一个自动编码器（autoencoder），但它编码后的分布在训练阶段需要被正则化，以此让它的隐空间（laten">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_UdOybs9wOe3zW8vDAfj9VA@2x-1581074525909.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_ayo0n2zq_gy7VERYmp4lrA@2x.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_LRPyMAwDlio7f1_YKYI2hw@2x.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_bY_ShNK6lBCQ3D9LYIfwJg@2x.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_ek9ZFmimq9Sr1sG5Z0jXfQ@2x.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_F-3zbCL_lp7EclKowfowMA@2x.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_Qd1xKV9o-AnWtfIDhhNdFg@2x.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_iSfaVxcGi_ELkKgAG0YRlQ@2x.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_ejNnusxYrn1NRDZf4Kg2lw@2x.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_Q5dogodt3wzKKktE0v3dMQ@2x.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_83S0T8IEJyudR_I5rI9now@2x.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_9ouOKh2w-b3NNOVx4Mw9bg@2x.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_dxlZr07dXNYiTFWL62D7Ag@2x.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_XYyWimolMhPDMg8qCNlcwg@2x.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_1n6HwjwUWbmE9PvCzOVcbw@2x.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_S8CoO3TGtFBpzv8GvmgKeg@2x.png">
+<meta property="og:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_eRcdr8gczweQHk--1pZF9A@2x.png">
+<meta property="article:published_time" content="2020-02-07T09:17:15.000Z">
+<meta property="article:modified_time" content="2020-02-19T02:14:14.000Z">
+<meta property="article:author" content="Fisher Chang">
+<meta property="article:tag" content="ml">
+<meta property="article:tag" content="vae">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://bluefisher.github.io/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_UdOybs9wOe3zW8vDAfj9VA@2x-1581074525909.png">
+
+<link rel="canonical" href="https://bluefisher.github.io/2020/02/07/%E7%90%86%E8%A7%A3-Variational-Autoencoders-VAEs/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>理解 Variational Autoencoders (VAEs) | Fisher's Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-124171741-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-124171741-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?553ac1673540f93b43866b93cc2d3efe";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Fisher's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Sein heißt Werden<br/>Leben heißt Lernen</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/BlueFisher" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2020/02/07/%E7%90%86%E8%A7%A3-Variational-Autoencoders-VAEs/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
+      <meta itemprop="name" content="Fisher Chang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fisher's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          理解 Variational Autoencoders (VAEs)
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-02-07 17:17:15" itemprop="dateCreated datePublished" datetime="2020-02-07T17:17:15+08:00">2020-02-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-02-19 10:14:14" itemprop="dateModified" datetime="2020-02-19T10:14:14+08:00">2020-02-19</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index"><span itemprop="name">Machine Learning</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/02/07/%E7%90%86%E8%A7%A3-Variational-Autoencoders-VAEs/" class="post-meta-item leancloud_visitors" data-flag-title="理解 Variational Autoencoders (VAEs)" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/02/07/%E7%90%86%E8%A7%A3-Variational-Autoencoders-VAEs/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/02/07/%E7%90%86%E8%A7%A3-Variational-Autoencoders-VAEs/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文翻译自 <a href="https://towardsdatascience.com/understanding-variational-autoencoders-vaes-f70510919f73" target="_blank" rel="noopener">Understanding Variational Autoencoders (VAEs)</a>, <a href="https://towardsdatascience.com/@joseph.rocca?source=post_page-----f70510919f73----------------------" target="_blank" rel="noopener">Joseph Rocca</a>, Sep 24, 2019</p>
+<p>这篇文章里，我们主要介绍一种深度生成模型：Variational Autoencoders (VAEs)。概括地说，VAE 就是一个自动编码器（autoencoder），但它编码后的分布在训练阶段需要被正则化，以此让它的隐空间（latent space）有足够好的性质来使我们生成新的数据。另外，用 variational 这个词是因为该方法与正则化和统计学中的变分推断有关。</p>
+<a id="more"></a>
+<h1 id="降维pca-与-autoencoders">降维，PCA 与 autoencoders</h1>
+<p>在这一小节，我们讨论与降维有关的一些符号定义，同时简要回顾下主成分分析（PCA）和 autoencoders，并说明这个两个方法其实是有关联的。</p>
+<h2 id="什么是降维">什么是降维？</h2>
+<p>在机器学习中，<strong>降维就是减少描述某些数据的特征数量（dimensionality reduction is the process of reducing the number of features that describe some data）</strong>。这个减少的过程要么就是选择（selection，只有一部分已存在的特征被保留下来），要么就是抽取（extraction，从原有的特征中生成数量较少的新特征）。降维可以用在许多需要低维度数据的领域中（数据可视化、数据储存、运算量大的计算等）。尽管有许多不同的方法可以做到降维，我们可以设置一个与这些方法中的大多数相匹配的通用框架。</p>
+<p>首先，我先将 encoder 当作使一种从“旧特征”产生“新特征”的过程，decoder 是这一过程的反过程。降维相当于是数据的压缩，encoder 压缩数据（从原始特征空间到编码空间，也叫隐空间 latent space），decoder 解压。当然根据初始数据分布、隐空间的维度还有 encoder 的定义，这个压缩过程也能是有损的，也就意味着一部分信息在 encoding 过程中可能会丢失，decoding 过程无法还原这些特征。</p>
+<figure>
+<img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_UdOybs9wOe3zW8vDAfj9VA@2x-1581074525909.png" alt="" /><figcaption>降维的主要过程</figcaption>
+</figure>
+<p>降维做主要的目的就是找到一组最佳的 encoder, decoder，换句话说，给定一系列可能的 encoder, decoder，我们就是要找到能保留最多信息的 encoder 和能产生最少重建误差（reconstruction error）的 decoder。如果我们分别用 <span class="math inline">\(E\)</span> 和 <span class="math inline">\(D\)</span> 来表示所有可能的 encoder 和 decoder，那么降维问题可以写成： <span class="math display">\[
+\left(e^{*}, d^{*}\right)=\underset{(e, d) \in E \times D}{\arg \min } \epsilon(x, d(e(x)))
+\]</span> 其中 <span class="math inline">\(\epsilon(x, d(e(x)))\)</span> 定义了输入 <span class="math inline">\(x\)</span> 与 encode, decode 后 <span class="math inline">\(d(e(x))\)</span> 之间的重建误差（reconstruction error）。接下来我们用 <span class="math inline">\(N\)</span> 表示数据的个数，<span class="math inline">\(n_d\)</span> 表示原始数据的空间维度，也就是 decoded 的空间维度，<span class="math inline">\(n_e\)</span> 表示降维后的空间维度（encoded）。</p>
+<h2 id="principal-components-analysis-pca">Principal components analysis (PCA)</h2>
+<p>一说到降维，第一个想到的应该就是 PCA 了，为了能用我们之前提到的通用框架来解释，同时也为了引出 autoencoders，我们简要回顾下 PCA。</p>
+<p>PCA 就是想要以线性组合的方式，从 <span class="math inline">\(n_d\)</span> 个原始特征，构建 <span class="math inline">\(n_e\)</span> 个互相独立的新特征，以此让原始数据在子空间上的映射与原始数据之间尽可能接近。换句话说，PCA 就是要去找一个最好的相对于原始空间的子空间（新特征的正交基），来让原始数据在这个子空间上的投影近似误差越小越好。</p>
+<figure>
+<img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_ayo0n2zq_gy7VERYmp4lrA@2x.png" alt="" /><figcaption>Principal Component Analysis (PCA)</figcaption>
+</figure>
+<p>如果用我们的框架来解释的话，就是我们要在一堆行是标准正交化的 <span class="math inline">\(n_d \times n_e\)</span> 矩阵 <span class="math inline">\(E\)</span> 中要到一个 encoder，同时要在一堆 <span class="math inline">\(n_e \times n_d\)</span> 矩阵 <span class="math inline">\(D\)</span> 中找到对应的 decoder。可以证明，与协方差特征矩阵的 <span class="math inline">\(n_e\)</span> 个最大特征值相对应的特征向量是正交的，并定义维度为 <span class="math inline">\(n_e\)</span> 的最佳子空间有着最小的投影数据近似误差。 因此，可以将这些 <span class="math inline">\(n_e\)</span> 个特征向量选择为我们的新特征，因此，降维问题可以表示为特征值、特征向量问题。 此外，在这种情况下，decoder 矩阵就是 encoder 矩阵的转置。</p>
+<figure>
+<img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_LRPyMAwDlio7f1_YKYI2hw@2x.png" alt="" /><figcaption>PCA 与我们之前提到的 encoder-decoder 框架一致</figcaption>
+</figure>
+<h2 id="autoencoders">Autoencoders</h2>
+<p>现在，我们讨论 autoencoders，来看如何使用神经网络来降低维度。autoencoders 的总体思路非常简单，包括将 encoder 和 decoder 设置为神经网络，并使用迭代优化来学习最佳的 encoding-decoding 方案。因此，在每次迭代中，我们向 autoencoders 提供一些数据，我们将 encoded-decoded 后的输出与初始数据进行比较，并将误差通过 autoencoders 反向传播以更新审京网络的权重。</p>
+<p>因此，直观地讲，整个 autoencoders 架构（encoder + decoder）会造成一个数据的瓶颈，从而确保只有信息的主要部分可以通过 autoencoders 并进行重构。从我们的通用框架角度来看， encoder 的神经网络结构定义了一系列的 encoders <span class="math inline">\(E\)</span> ，同理 decoder 的神经网络结构定义了一系列的 decoders <span class="math inline">\(D\)</span> ，通过最小化梯度下降这些网络的参数来完成对 encoder 和 decoder 的搜索，以最大程度地减少重构误差。</p>
+<figure>
+<img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_bY_ShNK6lBCQ3D9LYIfwJg@2x.png" alt="" /><figcaption>autoendoer 和它的损失函数</figcaption>
+</figure>
+<p>首先，假设我们的 encoder, decoder 的网络架构都只有一层，也没有用到非线性的激活器（线性 autoencoder）。 这样的 encoder 和 decoder 就是简单的线性变换，可以表示为矩阵。 在这种情况下，在某种意义上，我们可以看到与 PCA 的关系，就像 PCA 一样，我们就是要去找最佳的线性子空间来投影数据，而这样做时要尽可能减少信息丢失。 用 PCA 获得的 encoder,decoder 矩阵自然定义了用梯度下降算法所能满足的一种解决方案，但这不是唯一的解决方案。 事实上，某些基向量可以来描述相同的最佳子空间，因此，几个 encoder对也可以给出最佳的重构误差。 此外，对于线性 autoencoder（与PCA相反），我们最终获得的新特征不一定是独立的（神经网络中没有正交性约束）。</p>
+<figure>
+<img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_ek9ZFmimq9Sr1sG5Z0jXfQ@2x.png" alt="" /><figcaption>img</figcaption>
+</figure>
+<p>现在，假设 encoder 和 decoder 都是深度的且非线性的。 在这种情况下，网络结构越复杂，autoencoder 越可以降低更多的维度，同时保持较低的重构损失。 直观地讲，如果我们的 encoder 和 decoder 具有足够的自由度，则可以将任何初始维数减小为 1。也确实，具有“无限能力”的 encoder 理论上可以将我们的 N 个初始数据编码为1、2、3，……N 个，并且对应的 decoder 也可以进行逆变换，而在此过程中不会造成任何损失。</p>
+<p>但是，在我们应该注意两点。 首先，没有重建损失的降维通常要付出代价：隐空间中缺乏可解释和可利用的结构（缺乏正则化），其次，在大多数情况下，降维的最终目的不仅仅是减少数据的维数，而且要在减少维数的同时将数据结构信息的主要部分保留在简化的表征中。 由于这两个原因，必须根据降维的最终目的来仔细控制和调整隐空间的尺寸和 autoencoder 的“深度”（压缩的程度和质量）。</p>
+<figure>
+<img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_F-3zbCL_lp7EclKowfowMA@2x.png" alt="" /><figcaption>在降维的过程中，我们希望保留数据中最主要的结构</figcaption>
+</figure>
+<h1 id="variational-autoencoders">Variational Autoencoders</h1>
+<p>到目前为止，我们已经讨论了降维问题，并介绍了 autoencoders，它们是可以通过梯度下降训练的 encoder-decoder 架构。 现在，让我们联系样本生成问题，看看当前 autoencoders 的限制，并介绍 variational autoencoders。</p>
+<h2 id="autoencoders-在样本生成中的限制">Autoencoders 在样本生成中的限制</h2>
+<p>现在，自然会想到一个问题：“autoencoders 和样本生成之间的联系是什么？”。 确实，一旦对 autoencoders 进行了训练，我们既有 encoder 又有 decoder，但仍然没有一种方式来产生任何新内容。 乍一看，我们可能会认为，如果隐空间足够正则化（在训练过程中 encoder 很好地“组织”了），我们可以从该隐空间中随机取一个点并 decode 以得到一个新的样本，然后，decoder 将或多或少像生成对抗网络的生成器那样工作。</p>
+<figure>
+<img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_Qd1xKV9o-AnWtfIDhhNdFg@2x.png" alt="" /><figcaption>decoding 的过程</figcaption>
+</figure>
+<p>但是，正如我们在上一节中讨论的那样，autoencoders 的隐空间的正则性是一个难点，这取决于初始空间中数据的分布，隐空间的大小和 encoder 的架构。因此，很难先验地确保 encoder 会以与我们刚刚描述的生成过程兼容的方式组织隐空间。</p>
+<p>为了说明这一点，让我们考虑之前给出的示例，在该示例中，我们描述了一种强大的 autoencoders，强大到可以将任何 N 个初始训练数据映射到实数轴上（每个数据点都被编码为实数值），并且可以没有任何重建损失地 decode。在这种情况下，autoencoders 的高自由度使得可以在没有信息损失的情况下进行 encode 和 decode（尽管隐空间的维数较低），这样会导致<strong>严重的过拟合</strong>，意味着一旦 decode，隐空间的某些点将给出无意义的内容。如果我们极端地任意选择此一维空间中的样本，我们可以注意到 autoencoders 隐空间正则性问题要比这更为普遍。</p>
+<figure>
+<img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_iSfaVxcGi_ELkKgAG0YRlQ@2x.png" alt="" /><figcaption>不正则的隐空间不会生成新内容数据</figcaption>
+</figure>
+<p>其实这种现象是很正常的。 在 autoencoders 的任务中，<strong>autoencoders 仅仅尽可能减少重建损失而不在乎如何组织隐空间</strong>。 因此，如果我们对架构定义不好，那么在训练期间，神经网络会利用过拟合来尽其所能来完成其任务，除非我们对其进行正则化。</p>
+<h2 id="variational-autoencoders-的定义">variational autoencoders 的定义</h2>
+<p>为了能够将我们的 autoencoders 的 decoder 用于生成数据，我们必须确保隐空间足够正则化。一种解决方案是在训练过程中显式地正则化。 <strong>因此，可以将 variational autoencoders 定义为一种 autoencoder，这种 autoencoder 能对其进行正则化训练以避免过拟合并确保隐空间具有能够生成数据的良好属性。</strong></p>
+<p>就像标准 autoencoders 一样，variational autoencoders 是一种既由 encoder 又由 decoder 组成的架构，经过训练以使 encoded-decoded 后的数据与初始数据之间的重构误差最小。 但是，为了对隐空间正则化，我们对 encode-decode 过程进行了一些修改：我们将输入 encode 为一个隐空间上的分布，而不是将输入 encode 为单个点。 然后对模型进行如下训练：</p>
+<ol type="1">
+<li>首先，将输入 encode 为在隐空间上的分布</li>
+<li>第二，从该分布中采样隐空间中的一个点</li>
+<li>第三，对采样点进行 decode 并计算出重建误差</li>
+<li>最后，重建误差通过网络反向传播</li>
+</ol>
+<figure>
+<img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_ejNnusxYrn1NRDZf4Kg2lw@2x.png" alt="" /><figcaption>Autoencoder （确定型的）与 variational autoencoder （概率型的）之间的差异</figcaption>
+</figure>
+<p>在实际应用中，我们会选择正态分布作为 encoder 的分布，以便可以训练 encoder 返回描述这些高斯分布的均值和协方差矩阵。将输入的数据 encode 为具有一定方差而不是单个点的分布的原因是，它可以非常自然地表达隐空间正则化：encoder 返回的分布需要强制接近标准正态分布。下一小节中，我们将通过这种方式确保隐空间的局部和全局正则化（局部由方差控制，全局由均值控制）。</p>
+<p>因此，在训练 VAE 时最小化的损失函数由“重构项”（在最后一层上）和“正则化项”（在隐藏层上）组成，“重构项”倾向于使 encoding-decoding 方案表现得尽可能好，“正则化项”通过使 encoder 返回的分布接近标准正态分布来正则化隐空间。该正则化项表示为返回的分布与标准高斯之间的 Kulback-Leibler 散度。我们可以注意到，两个高斯分布之间的 KL 散度具有封闭形式，可以直接用两种分布的均值和协方差矩阵来表示。</p>
+<figure>
+<img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_Q5dogodt3wzKKktE0v3dMQ@2x.png" alt="" /><figcaption>在 VAE 中，损失函数由两项组成</figcaption>
+</figure>
+<h2 id="正则化的直观理解">正则化的直观理解</h2>
+<p>我们直接用两张图来代替原文的大段描述：</p>
+<figure>
+<img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_83S0T8IEJyudR_I5rI9now@2x.png" alt="" /><figcaption>正则化与非正则化隐空间的区别</figcaption>
+</figure>
+<figure>
+<img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_9ouOKh2w-b3NNOVx4Mw9bg@2x.png" alt="" /><figcaption>VAE 返回的分布必须是正则化的，以此来确保隐空间有足够好的性质</figcaption>
+</figure>
+<h1 id="vaes-中的数学">VAEs 中的数学</h1>
+<p>在上一小节中，我们给出了以下直观的理解：VAE 就是将输入 encode 为分布而不是点的 autoencoder，并且通过将 encoder 返回的分布约束为接近标准正态分布而得到正则化的隐空间。 在本小节中，我们将对 VAE 进行更数学化的介绍，这将使我们能够更严格地证明正则化项的合理性。 为此，我们将建立一个概率框架并使用变分推断。</p>
+<h2 id="概率框架及一些假设">概率框架及一些假设</h2>
+<p>首先，定义一个概率图模型来描述我们的数据。 我们用 <span class="math inline">\(x\)</span> 表示我们原始数据的变量，并假定 <span class="math inline">\(x\)</span> 是由未直接观测到的隐变量 <span class="math inline">\(z\)</span>（encoded 后的表征）生成的。 因此，对于每个数据点，假定以下两个步骤的生成过程：</p>
+<ol type="1">
+<li>首先，隐变量 <span class="math inline">\(z\)</span> 是由一个先验 <span class="math inline">\(p(z)\)</span> 采样而来的</li>
+<li>其次，数据 <span class="math inline">\(x\)</span> 是由条件似然分布 <span class="math inline">\(p(x|z)\)</span> 采样而来的</li>
+</ol>
+<p><img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_dxlZr07dXNYiTFWL62D7Ag@2x.png" alt="数据生成过程的图模型" style="zoom:50%;" /></p>
+<p>根据这种概率模型，我们可以重新定义 encoder 和 decoder 的概念。 与只考虑确定性 encoder 和 decoder 的简单 autoencoder 相反，我们现在将考虑这两个对象的概率版本。 “概率decoder”由 <span class="math inline">\(p(x|z)\)</span>定义，用来描述给定 encoded 变量的 decoded 变量的分布，而 “概率encoded”由 <span class="math inline">\(p(z|x)\)</span> 定义，用来描述给定 decoded 变量的 encoded 变量的分布。</p>
+<p>至此，我们已经可以注意到，在简单的 autoencoder 中所缺少的隐空间正则化出现在数据生成过程的定义中：隐空间中的 encoded 表征 <span class="math inline">\(z\)</span> 实际上被假定遵循先验分布 <span class="math inline">\(p(z)\)</span>。 另外，我们还可以回想一下著名的贝叶斯定理，先验 <span class="math inline">\(p(z)\)</span>，似然 <span class="math inline">\(p(x|z)\)</span> 和后验 <span class="math inline">\(p(z|x)\)</span> 之间的联系。 <span class="math display">\[
+p(z | x)=\frac{p(x | z) p(z)}{p(x)}=\frac{p(x | z) p(z)}{\int p(x | u) p(u) d u}
+\]</span> 现在假设 <span class="math inline">\(p(z)\)</span> 是标准高斯分布，<span class="math inline">\(p(x|z)\)</span> 也是一个高斯分布，且它的均值由一个确定性函数 <span class="math inline">\(f(z)\)</span> 定义，协方差矩阵是某一个常量 <span class="math inline">\(c\)</span> 乘以单位矩阵 <span class="math inline">\(I\)</span> 而来。函数 <span class="math inline">\(f\)</span> 暂且是一堆函数 <span class="math inline">\(F\)</span> 中的一个，我们稍后再去选择这个函数。现在我们有 <span class="math display">\[
+\begin{array}{l}{p(z)=\mathcal{N}(0, I)} \\ {p(x | z) \equiv \mathcal{N}(f(z), c I) \quad f \in F \quad c&gt;0}\end{array}
+\]</span> 现在，假设 <span class="math inline">\(f\)</span> 已经是最优了且固定了下来，那么理论上因为我们知道了 <span class="math inline">\(p(z)\)</span> 和 <span class="math inline">\(p(x|z)\)</span> ，就可以使用贝叶斯理论来计算 <span class="math inline">\(p(z|x)\)</span> ，也就是经典的贝叶斯推理问题。但是，这种贝叶斯计算一般是很困难，无法完成的（因为分母的积分没有办法计算），所以需要一种近似的方法比如变分推断 variational inference。</p>
+<h2 id="变分推断公式">变分推断公式</h2>
+<p>在统计学中，变分推断（VI）就是用来近似复杂分布的一种方法。这个想法就是要使用一个参数化的分布族（例如高斯族，其参数是均值和协方差），在该族中寻找目标分布的最佳近似值。 该族中最好的元素是使给定的近似误差（在大多数情况下，近似与目标之间的 KL 散度）最小的一种元素，并通过梯度下降来求得该参数。</p>
+<p>现在我们用一个高斯分布 <span class="math inline">\(q_x(z)\)</span> 来近似 <span class="math inline">\(p(z|x)\)</span> 。它的均值与方差由函数 <span class="math inline">\(g\)</span> 和 <span class="math inline">\(h\)</span> 定义，这两个函数均是 <span class="math inline">\(x\)</span> 的函数。同时这两个函数分别属于函数族 <span class="math inline">\(G\)</span> 和 <span class="math inline">\(H\)</span>。 <span class="math display">\[
+q_{x}(z) \equiv \mathcal{N}(g(x), h(x)) \quad g \in G \quad h \in H
+\]</span> 那么现在我们已经定义了一族要进行变分推断的近似函数，并且要在这些函数中通过优化 <span class="math inline">\(f\)</span> 和 <span class="math inline">\(h\)</span> 来找到最优的近似函数（其实就是优化 <span class="math inline">\(f\)</span> 和 <span class="math inline">\(h\)</span> 的参数），这个优化就是要最小化近似分布与目标分布 <span class="math inline">\(p(z|x)\)</span> 之间的 KL 散度。换句话说，我们要找到最优的 <span class="math inline">\(g^*\)</span> 与 <span class="math inline">\(f^*\)</span> 以满足： <span class="math display">\[
+\begin{aligned}\left(g^{*}, h^{*}\right) &amp;=\underset{(g, h) \in G \times H}{\arg \min } K L\left(q_{x}(z), p(z | x)\right) \\ 
+&amp;=\underset{(g, h) \in G \times H}{\arg \min }\left(\mathbb{E}_{z \sim q_{x}}\left(\log q_{x}(z)\right)-\mathbb{E}_{z \sim q_{x}}\left(\log \frac{p(x | z) p(z)}{p(x)}\right)\right) \\ 
+&amp;=\underset{(g, h) \in G \times H}{\arg \min }\left(\mathbb{E}_{z \sim q_{x}}\left(\log q_{x}(z)\right)-\mathbb{E}_{z \sim q_{x}}(\log p(z))-\mathbb{E}_{z \sim q_{x}}(\log p(x | z))+\mathbb{E}_{z \sim q_{x}}(\log p(x))\right) \\ 
+&amp;=\underset{(g, h) \in G \times H}{\arg \max }\left(\mathbb{E}_{z \sim q_{x}}(\log p(x | z))-K L\left(q_{x}(z), p(z)\right)\right) \\ 
+&amp;=\underset{(g, h) \in G \times H}{\arg \max }\left(\mathbb{E}_{z \sim q_{x}}\left(-\frac{\|x-f(z)\|^{2}}{2 c}\right)-K L\left(q_{x}(z), p(z)\right)\right) \end{aligned}
+\]</span> 在倒数第二个式子中，即在估计后验 <span class="math inline">\(p(z|x)\)</span> 的过程中，我们可以看到一种权衡：既要最大化初始观测数据的似然（第一项，最大化期望 log-likelihood），又要更靠近先验分布（第二项，最小化 <span class="math inline">\(q_x(z)\)</span> 与 <span class="math inline">\(p(z)\)</span> 之间的 KL 散度）。这种权衡在贝叶斯推断问题中很自然，并且表达了我们想要找到在初始数据的置信度与先验的置信度之间的平衡。</p>
+<p>到目前为止，我们假设函数 <span class="math inline">\(f\)</span> 是已知并且是固定的，并且在这种假设下我们可以使用变分推断的方法来近似后验 <span class="math inline">\(p(z|x)\)</span> 。但在实际操作中，这个函数 <span class="math inline">\(f\)</span> ，也就是定义了 decoder 的函数是不可知的，也同样的需要在一堆函数族中进行选择。为此，让我们回想一下我们的最初目标就是要去找到一个性能良好的 encoding-decoding 方案，且该方案的隐空间是正则化的，并足够正则化来生成新数据。如果正则性主要是由先验分布所决定的，那么整个 encoding-decoding 的性能主要取决于函数 <span class="math inline">\(f\)</span> 的选择。也的确，由于 <span class="math inline">\(p(z|x)\)</span> 可以由 <span class="math inline">\(p(z)\)</span> 和 <span class="math inline">\(p(x|z)\)</span> 近似（用变分推断）而来且 <span class="math inline">\(p(z)\)</span> 是一个简单的标准高斯分布，因此在我们的模型中需要优化的只有两个：参数 <span class="math inline">\(c\)</span> ，控制着似然的方差，和函数 <span class="math inline">\(f\)</span> ，控制着似然的均值。</p>
+<p>我们之前也提到过，我们可以从 <span class="math inline">\(F\)</span> 中选择去任意的 <span class="math inline">\(f\)</span> 来得到 <span class="math inline">\(p(z|x)\)</span> 的最佳近似 <span class="math inline">\(q^*_x(z)\)</span> 。如果不管它的概率属性，我们想要做的就是让 encoding-decoding 性能越高越好，那么我们更想要去选择能最大化在给定 <span class="math inline">\(z\)</span> 下（<span class="math inline">\(z\)</span> 从 <span class="math inline">\(q^*_x(z)\)</span> 采样而来）的 <span class="math inline">\(x\)</span> 的期望 log-likelihood 的那些 <span class="math inline">\(f\)</span> 。<strong>也就是说，对于一个给定的输入 <span class="math inline">\(x\)</span> ，当我们从 <span class="math inline">\(q^*_x(z)\)</span> 采样 <span class="math inline">\(z\)</span> ，又从 <span class="math inline">\(p(x|z)\)</span> 采样得到 <span class="math inline">\(\hat{x}\)</span> 时，我们想要去最大化 <span class="math inline">\(\hat{x}=x\)</span> 的概率</strong>。因此，我们想要找到的 <span class="math inline">\(f^*\)</span> 满足： <span class="math display">\[
+\begin{aligned} f^{*} &amp;=\underset{f \in F}{\arg \max } \mathbb{E}_{z \sim q_{x}^{*}}(\log p(x | z)) \\ &amp;=\underset{f \in F}{\arg \max } \mathbb{E}_{z \sim q_{x}^{*}}\left(-\frac{\|x-f(z)\|^{2}}{2 c}\right) \end{aligned}
+\]</span> 其中函数 <span class="math inline">\(f\)</span> 决定了 <span class="math inline">\(q^*_x(z)\)</span>。将上面这些都联系起来，我们其实就是要去找最优 <span class="math inline">\(f^*,g^*,h^*\)</span>，使： <span class="math display">\[
+\left(f^{*}, g^{*}, h^{*}\right)=\underset{(f, g, h) \in F \times G \times H}{\arg \max }\left(\mathbb{E}_{z \sim q_{x}}\left(-\frac{\|x-f(z)\|^{2}}{2 c}\right)-K L\left(q_{x}(z), p(z)\right)\right)
+\]</span> 我们可以将这个目标函数与之前介绍的 VAEs 的直观理解联系起来：第一项是 <span class="math inline">\(x\)</span> 与 <span class="math inline">\(f(z)\)</span> 之间的重构误差，第二项是 <span class="math inline">\(q_x(z)\)</span> 与 <span class="math inline">\(p(z)\)</span> （也就是标准高斯）之间的 KL 散度。我们也可以注意到常量 <span class="math inline">\(c\)</span> 平衡着这两项：<span class="math inline">\(c\)</span> 越大，模型中的概率 decoder <span class="math inline">\(f(z)\)</span> 周围的方差就越大，也因此我们更倾向正则化项。若 <span class="math inline">\(c\)</span> 小，则相反。</p>
+<h2 id="引入神经网络">引入神经网络</h2>
+<p>至此，我们建立了一个依赖于三个函数 <span class="math inline">\(f,g,h\)</span> 的概率模型，并用变分推断的方法解释了优化问题来得到最优 <span class="math inline">\(f^*,g^*,h^*\)</span> 。由于我们没有办法遍历整个函数族，所以我们要限制优化的范围，并用神经网络来表达 <span class="math inline">\(f,g,h\)</span> 。</p>
+<p>在实际中，<span class="math inline">\(g\)</span> 和 <span class="math inline">\(h\)</span> 不会被分开形成两个独立的网络，而是共享一部分的权重： <span class="math display">\[
+g(x)=g_{2}\left(g_{1}(x)\right) \quad h(x)=h_{2}\left(h_{1}(x)\right) \quad g_{1}(x)=h_{1}(x)
+\]</span> 我们在 <span class="math inline">\(q_x(z)\)</span> 的协方差矩阵中定义过，<span class="math inline">\(h(x)\)</span> 应该是一个方阵。但为了简单起见，我们假设 <span class="math inline">\(p(z|x)\)</span> 的近似 <span class="math inline">\(q_x(z)\)</span> 是一个对角协方差矩阵的多维正态分布。在这个假设下 <span class="math inline">\(h(x)\)</span> 就是一个简单的向量，代表协方差矩阵的对角线，并且长度与 <span class="math inline">\(g(x)\)</span> 相同，当然这会降低近似 <span class="math inline">\(p(z|x)\)</span> 的准确性。</p>
+<figure>
+<img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_XYyWimolMhPDMg8qCNlcwg@2x.png" alt="" /><figcaption>VAE 的 encoder 部分</figcaption>
+</figure>
+<p>与 encoder 部分相反，我们假设 <span class="math inline">\(p(x|z)\)</span> 是一个有着固定方差的高斯分布。函数关于 <span class="math inline">\(z\)</span> 的函数 <span class="math inline">\(f\)</span> 定义了这个高斯分布的均值，同时也用一个神经网络来表示：</p>
+<figure>
+<img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_1n6HwjwUWbmE9PvCzOVcbw@2x.png" alt="" /><figcaption>VAE 的 decoder 部分</figcaption>
+</figure>
+<p>然后把 encoder 和 decoder 两部分串联起来就可以组成 VAE 的整体架构了。但在训练过程中，我们必须注意从 encoder 返回的分布中采样的方式，因为采样的过程必须允许误差通过网络反向传播。尽管是在整个架构的一半进行随机采样，但有一个重参数技巧让梯度下降成为可能。因为 <span class="math inline">\(z\)</span> 是遵循均值为 <span class="math inline">\(g(x)\)</span> 方差为 <span class="math inline">\(h(x)\)</span> 的高斯分布，它也可以被表示为： <span class="math display">\[
+z=h(x) \zeta+g(x) \quad \zeta \sim \mathcal{N}(0, I)
+\]</span> <img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_S8CoO3TGtFBpzv8GvmgKeg@2x.png" alt="重参数技巧" /></p>
+<p>最终，VAE 架构的目标函数可以由前面小节给出，其中，理论上期望可以用蒙特卡洛来估计。我们定义 <span class="math inline">\(C=1/(2c)\)</span> ，那么损失函数即为一个重构项，一个正则化项还有一个常数来定义这两项的权重。</p>
+<figure>
+<img src="/images/2020-02-07-理解-Variational-Autoencoders-VAEs/1_eRcdr8gczweQHk--1pZF9A@2x.png" alt="" /><figcaption>Varitional Autoencoders</figcaption>
+</figure>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/wechatpay.jpg" alt="Fisher Chang 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/alipay.jpg" alt="Fisher Chang 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Fisher Chang
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://bluefisher.github.io/2020/02/07/%E7%90%86%E8%A7%A3-Variational-Autoencoders-VAEs/" title="理解 Variational Autoencoders (VAEs)">https://bluefisher.github.io/2020/02/07/理解-Variational-Autoencoders-VAEs/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ml/" rel="tag"># ml</a>
+              <a href="/tags/vae/" rel="tag"># vae</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/02/06/%E7%90%86%E8%A7%A3-Variational-Lower-Bound/" rel="prev" title="理解 Variational Lower Bound">
+      <i class="fa fa-chevron-left"></i> 理解 Variational Lower Bound
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/02/16/Natural-Gradient-Descent/" rel="next" title="Natural Gradient Descent">
+      Natural Gradient Descent <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%99%8D%E7%BB%B4pca-%E4%B8%8E-autoencoders"><span class="nav-number">1.</span> <span class="nav-text">降维，PCA 与 autoencoders</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E9%99%8D%E7%BB%B4"><span class="nav-number">1.1.</span> <span class="nav-text">什么是降维？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#principal-components-analysis-pca"><span class="nav-number">1.2.</span> <span class="nav-text">Principal components analysis (PCA)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#autoencoders"><span class="nav-number">1.3.</span> <span class="nav-text">Autoencoders</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#variational-autoencoders"><span class="nav-number">2.</span> <span class="nav-text">Variational Autoencoders</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#autoencoders-%E5%9C%A8%E6%A0%B7%E6%9C%AC%E7%94%9F%E6%88%90%E4%B8%AD%E7%9A%84%E9%99%90%E5%88%B6"><span class="nav-number">2.1.</span> <span class="nav-text">Autoencoders 在样本生成中的限制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#variational-autoencoders-%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">2.2.</span> <span class="nav-text">variational autoencoders 的定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AD%A3%E5%88%99%E5%8C%96%E7%9A%84%E7%9B%B4%E8%A7%82%E7%90%86%E8%A7%A3"><span class="nav-number">2.3.</span> <span class="nav-text">正则化的直观理解</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#vaes-%E4%B8%AD%E7%9A%84%E6%95%B0%E5%AD%A6"><span class="nav-number">3.</span> <span class="nav-text">VAEs 中的数学</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E7%8E%87%E6%A1%86%E6%9E%B6%E5%8F%8A%E4%B8%80%E4%BA%9B%E5%81%87%E8%AE%BE"><span class="nav-number">3.1.</span> <span class="nav-text">概率框架及一些假设</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%98%E5%88%86%E6%8E%A8%E6%96%AD%E5%85%AC%E5%BC%8F"><span class="nav-number">3.2.</span> <span class="nav-text">变分推断公式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%95%E5%85%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C"><span class="nav-number">3.3.</span> <span class="nav-text">引入神经网络</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Fisher Chang"
+      src="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
+  <p class="site-author-name" itemprop="name">Fisher Chang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">62</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BlueFisher" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BlueFisher" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/4909165/fish-tree" title="StackOverflow → https:&#x2F;&#x2F;stackoverflow.com&#x2F;users&#x2F;4909165&#x2F;fish-tree" rel="noopener" target="_blank"><i class="fa fa-fw fa-stack-overflow"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://ai.stackexchange.com/users/15525/fish-tree" title="AI.StackExchange → https:&#x2F;&#x2F;ai.stackexchange.com&#x2F;users&#x2F;15525&#x2F;fish-tree" rel="noopener" target="_blank"><i class="fa fa-fw fa-stack-exchange"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blue.fisher.zzy@gmail.com" title="E-Mail → mailto:blue.fisher.zzy@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title">
+      <i class="fa fa-fw fa-link"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://stepneverstop.github.io/" title="https:&#x2F;&#x2F;stepneverstop.github.io&#x2F;" rel="noopener" target="_blank">Keavnn</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fisher Chang</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : '7ruImtbdRTEUvc3qxbGlSc0t-gzGzoHsz',
+      appKey     : 'Vbun7eF790Szhvl9qKC0CCsm',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-logo.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-logo.png">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"bluefisher.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文基于 ml-agents 中与 python 交互的文档 Unity ML-Agents Python Interface and Trainers ，更加详细地介绍整个交互 API">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python 与 Unity mlagents 交互 API">
+<meta property="og:url" content="https://bluefisher.github.io/2018/12/29/Python-%E4%B8%8E-Unity-mlagents-%E4%BA%A4%E4%BA%92-API/index.html">
+<meta property="og:site_name" content="Fisher&#39;s Blog">
+<meta property="og:description" content="本文基于 ml-agents 中与 python 交互的文档 Unity ML-Agents Python Interface and Trainers ，更加详细地介绍整个交互 API">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-12-29T13:07:54.000Z">
+<meta property="article:modified_time" content="2019-07-19T02:29:22.000Z">
+<meta property="article:author" content="Fisher Chang">
+<meta property="article:tag" content="python">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://bluefisher.github.io/2018/12/29/Python-%E4%B8%8E-Unity-mlagents-%E4%BA%A4%E4%BA%92-API/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Python 与 Unity mlagents 交互 API | Fisher's Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-124171741-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-124171741-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?553ac1673540f93b43866b93cc2d3efe";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Fisher's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Sein heißt Werden<br/>Leben heißt Lernen</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/BlueFisher" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2018/12/29/Python-%E4%B8%8E-Unity-mlagents-%E4%BA%A4%E4%BA%92-API/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
+      <meta itemprop="name" content="Fisher Chang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fisher's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Python 与 Unity mlagents 交互 API
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-12-29 21:07:54" itemprop="dateCreated datePublished" datetime="2018-12-29T21:07:54+08:00">2018-12-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-07-19 10:29:22" itemprop="dateModified" datetime="2019-07-19T10:29:22+08:00">2019-07-19</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/12/29/Python-%E4%B8%8E-Unity-mlagents-%E4%BA%A4%E4%BA%92-API/" class="post-meta-item leancloud_visitors" data-flag-title="Python 与 Unity mlagents 交互 API" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/12/29/Python-%E4%B8%8E-Unity-mlagents-%E4%BA%A4%E4%BA%92-API/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/12/29/Python-%E4%B8%8E-Unity-mlagents-%E4%BA%A4%E4%BA%92-API/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文基于 <a href="https://github.com/Unity-Technologies/ml-agents" target="_blank" rel="noopener">ml-agents</a> 中与 python 交互的文档 <em><a href="https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Python-API.md" target="_blank" rel="noopener">Unity ML-Agents Python Interface and Trainers</a></em> ，更加详细地介绍整个交互 API</p>
+<a id="more"></a>
+<h1 id="初始化-unity-环境">初始化 unity 环境</h1>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> mlagents.envs <span class="keyword">import</span> UnityEnvironment</span><br><span class="line"></span><br><span class="line">%matplotlib inline</span><br></pre></td></tr></table></figure>
+<p>初始化环境 <code>env = UnityEnvironment(file_name="3DBall", worker_id=0, seed=1)</code></p>
+<p><code>file_name</code> 是 unity 编译生成的二进制可执行环境。</p>
+<p><code>worker_id</code> 表示你想用哪个端口来与环境进行交互，可以用来进行并行交互，比如 A3C 。</p>
+<p><code>seed</code> 为训练过程中的随机种子，如果想让 untiy 环境每次随机的效果相同，则种子设置为固定值。</p>
+<p>若 <code>file_name=None</code> 则表示 python 直接与 unity editor 进行交互，等待编辑器中的开始按钮被按下 <em>Start training by pressing the Play button in the Unity Editor</em> ，同时这个时候 <code>worker_id</code> 必须为 0 才能与编辑器进行连接。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">env = UnityEnvironment()</span><br></pre></td></tr></table></figure>
+<pre><code>INFO:mlagents.envs:Start training by pressing the Play button in the Unity Editor.
+INFO:mlagents.envs:
+&#39;Academy&#39; started successfully!
+Unity Academy name: Academy
+        Number of Brains: 2
+        Number of Training Brains : 2
+        Reset Parameters :
+        copy -&gt; 1.0
+Unity brain name: Brain1
+        Number of Visual Observations (per agent): 2
+        Vector Observation space size (per agent): 8
+        Number of stacked Vector Observation: 1
+        Vector Action space type: continuous
+        Vector Action space size (per agent): [2]
+        Vector Action descriptions: 3, 3
+Unity brain name: Brain2
+        Number of Visual Observations (per agent): 0
+        Vector Observation space size (per agent): 8
+        Number of stacked Vector Observation: 1
+        Vector Action space type: continuous
+        Vector Action space size (per agent): [2]
+        Vector Action descriptions: 3, 3</code></pre>
+<h1 id="获取基础-brain-信息">获取基础 brain 信息</h1>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">print(env.brains)</span><br><span class="line">print(env.brain_names)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> name <span class="keyword">in</span> env.brain_names:</span><br><span class="line">    params = env.brains[name]</span><br><span class="line">    print(params)</span><br><span class="line">    print(<span class="string">'brain_name: '</span>, end=<span class="string">''</span>)</span><br><span class="line">    print(params.brain_name)</span><br><span class="line"></span><br><span class="line">    print(<span class="string">'num_stacked_vector_observations: '</span>, end=<span class="string">''</span>)  <span class="comment"># 向量状态栈大小</span></span><br><span class="line">    print(params.num_stacked_vector_observations)</span><br><span class="line">    print(<span class="string">'vector_observation_space_size: '</span>, end=<span class="string">''</span>)</span><br><span class="line">    print(params.vector_observation_space_size)  <span class="comment"># 向量状态空间</span></span><br><span class="line"></span><br><span class="line">    print(<span class="string">'number_visual_observations: '</span>, end=<span class="string">''</span>)</span><br><span class="line">    print(params.number_visual_observations)  <span class="comment"># 图像状态数量</span></span><br><span class="line">    print(<span class="string">'camera_resolutions: '</span>, end=<span class="string">''</span>)</span><br><span class="line">    print(params.camera_resolutions)  <span class="comment"># 图像的分辨率</span></span><br><span class="line"></span><br><span class="line">    print(<span class="string">'vector_action_space_type: '</span>, end=<span class="string">''</span>)</span><br><span class="line">    print(params.vector_action_space_type)  <span class="comment"># 行为空间类型（离散或连续）</span></span><br><span class="line">    print(<span class="string">'vector_action_space_size: '</span>, end=<span class="string">''</span>)</span><br><span class="line">    print(params.vector_action_space_size)  <span class="comment"># 行为空间</span></span><br><span class="line">    print(<span class="string">'vector_action_descriptions: '</span>, end=<span class="string">''</span>)</span><br><span class="line">    print(params.vector_action_descriptions)  <span class="comment"># 行为描述</span></span><br><span class="line"></span><br><span class="line">    print(<span class="string">'---------'</span>)</span><br></pre></td></tr></table></figure>
+<pre><code>{&#39;Brain1&#39;: &lt;mlagents.envs.brain.BrainParameters object at 0x0000023EC4BFB0F0&gt;, &#39;Brain2&#39;: &lt;mlagents.envs.brain.BrainParameters object at 0x0000023EC5327470&gt;}
+[&#39;Brain1&#39;, &#39;Brain2&#39;]
+Unity brain name: Brain1
+        Number of Visual Observations (per agent): 2
+        Vector Observation space size (per agent): 8
+        Number of stacked Vector Observation: 1
+        Vector Action space type: continuous
+        Vector Action space size (per agent): [2]
+        Vector Action descriptions: 3, 3
+brain_name: Brain1
+num_stacked_vector_observations: 1
+vector_observation_space_size: 8
+number_visual_observations: 2
+camera_resolutions: [{&#39;height&#39;: 450, &#39;width&#39;: 500, &#39;blackAndWhite&#39;: False}, {&#39;height&#39;: 550, &#39;width&#39;: 600, &#39;blackAndWhite&#39;: False}]
+vector_action_space_type: continuous
+vector_action_space_size: [2]
+vector_action_descriptions: [&#39;3&#39;, &#39;3&#39;]
+---------
+Unity brain name: Brain2
+        Number of Visual Observations (per agent): 0
+        Vector Observation space size (per agent): 8
+        Number of stacked Vector Observation: 1
+        Vector Action space type: continuous
+        Vector Action space size (per agent): [2]
+        Vector Action descriptions: 3, 3
+brain_name: Brain2
+num_stacked_vector_observations: 1
+vector_observation_space_size: 8
+number_visual_observations: 0
+camera_resolutions: []
+vector_action_space_type: continuous
+vector_action_space_size: [2]
+vector_action_descriptions: [&#39;3&#39;, &#39;3&#39;]
+---------</code></pre>
+<h1 id="重置训练环境开始交互">重置训练环境，开始交互</h1>
+<p><code>train_mode=True</code> 表示是训练模式，即用的是 <em>Acadmey</em> 中的 <em>Training Configuration</em> ， <code>train_mode=False</code> 为推断模式，即用的是 <em>Acadmey</em> 中的 <em>Inference Configuration</em> ，unity 中会将每帧都绘制</p>
+<p><code>config={}</code> 是 reset 环境时的参数，类型为 <code>dict</code> 。需要预先在 unity editor 中定义所有的参数。</p>
+<p>返回为一个 <code>dict</code> ，包含所有 <code>brain</code> 的信息</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">brain_infos = env.reset(train_mode=<span class="literal">True</span>, config=&#123;</span><br><span class="line">    <span class="string">'copy'</span>: <span class="number">1</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<pre><code>INFO:mlagents.envs:Academy reset with parameters: copy -&gt; 1</code></pre>
+<p><code>vector_observations</code> 是一个 <code>numpy</code> ，维度为 <code>(智能体数量, 向量状态的长度 * 向量状态栈大小)</code> ，其中向量状态栈代表有多少状态被储存起来一起作为当前的状态</p>
+<p><code>visual_observations</code> 是一个 <code>list</code> ，个数为 <code>Brain</code> 中设置的摄像机的个数，其中每一个元素为也为一个 <code>list</code> ，长度为智能体数量。该 <code>list</code> 中的元素为一个三维的 <code>numpy</code> ，维度为 <code>(长，宽，通道数)</code> 。如每个 <code>Brain</code> 要设置左右两台观测的摄像机，则 <code>visual_observations</code> 长度为 2 ，分别代表左右两个摄像机。第一个元素为所有智能体的左摄像机的图像集合，第二个元素为所有只能提的右摄像机的图像集合。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> name <span class="keyword">in</span> env.brain_names:</span><br><span class="line">    params = env.brains[name]</span><br><span class="line">    info = brain_infos[name]</span><br><span class="line">    print(info)</span><br><span class="line">    print(<span class="string">'vector_observations: '</span>, end=<span class="string">''</span>)  <span class="comment"># 向量状态 numpy</span></span><br><span class="line">    print(info.vector_observations.shape)</span><br><span class="line">    print(<span class="string">'visual_observations: '</span>)  <span class="comment"># 图像状态 list</span></span><br><span class="line">    <span class="keyword">for</span> i, obs_per_camera <span class="keyword">in</span> enumerate(info.visual_observations):</span><br><span class="line">        print(<span class="string">'\t'</span>, <span class="string">'number of agents'</span>, len(obs_per_camera))</span><br><span class="line">        <span class="keyword">for</span> j, ob <span class="keyword">in</span> enumerate(obs_per_camera):</span><br><span class="line">            print(ob.shape)</span><br><span class="line">            <span class="keyword">if</span> params.camera_resolutions[i][<span class="string">'blackAndWhite'</span>]:</span><br><span class="line">                plt.imshow(ob[:, :, <span class="number">0</span>], cmap=plt.cm.gray)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                plt.imshow(ob)</span><br><span class="line">            plt.show()</span><br><span class="line">    print(<span class="string">'text_observations: '</span>, end=<span class="string">''</span>)  <span class="comment"># 文字状态 list</span></span><br><span class="line">    print(info.text_observations)</span><br><span class="line">    print(<span class="string">'rewards: '</span>, end=<span class="string">''</span>)  <span class="comment"># 奖励 list</span></span><br><span class="line">    print(info.rewards)</span><br><span class="line">    print(<span class="string">'local_done: '</span>, end=<span class="string">''</span>)  <span class="comment"># 智能体回合是否结束 list</span></span><br><span class="line">    print(info.local_done)</span><br><span class="line">    print(<span class="string">'max_reached: '</span>, end=<span class="string">''</span>)  <span class="comment"># 智能体回合是否到达最大步数（如果达到最大步数，无论智能体回合是否结束，local_done 也为 True） list</span></span><br><span class="line">    print(info.max_reached)</span><br><span class="line">    print(<span class="string">'previous_vector_actions: '</span>, end=<span class="string">''</span>)  <span class="comment"># 上一个向量行为 numpy</span></span><br><span class="line">    print(info.previous_vector_actions.shape)</span><br><span class="line">    print(<span class="string">'agents: '</span>, end=<span class="string">''</span>)  <span class="comment"># 所有智能体 id list</span></span><br><span class="line">    print(info.agents)</span><br><span class="line">    print(<span class="string">'---------'</span>)</span><br></pre></td></tr></table></figure>
+<pre><code>&lt;mlagents.envs.brain.BrainInfo object at 0x0000020F88ED0FD0&gt;
+vector_observations: (2, 8)
+visual_observations: 
+     number of agents 2
+     (450, 500, 3)
+     (450, 500, 3)
+     number of agents 2
+     (550, 600, 3)
+     (550, 600, 3)
+text_observations: [&#39;&#39;, &#39;&#39;]
+rewards: [0.0, 0.0]
+local_done: [False, False]
+max_reached: [False, False]
+previous_vector_actions: (2, 2)
+agents: [14714, 14736]
+---------
+&lt;mlagents.envs.brain.BrainInfo object at 0x0000020F88F69978&gt;
+vector_observations: (1, 8)
+visual_observations: 
+text_observations: [&#39;&#39;]
+rewards: [0.0]
+local_done: [False]
+max_reached: [False]
+previous_vector_actions: (1, 2)
+agents: [14658]
+---------</code></pre>
+<h2 id="一个最简单的交互方式">一个最简单的交互方式</h2>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">env.reset(train_mode=<span class="literal">False</span>, config=&#123;</span><br><span class="line">    <span class="string">'copy'</span>: <span class="number">1</span></span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">200</span>):</span><br><span class="line">    env.step(&#123;</span><br><span class="line">        <span class="string">'Brain1'</span>: np.random.randn(<span class="number">2</span>, <span class="number">2</span>),</span><br><span class="line">        <span class="string">'Brain2'</span>: np.random.randn(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+<pre><code>INFO:mlagents.envs:Academy reset with parameters: copy -&gt; 1</code></pre>
+<h2 id="一个单-brain-的复杂例子不能直接执行只是演示">一个单 brain 的复杂例子（不能直接执行，只是演示）</h2>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">simulate</span><span class="params">(brain_info)</span>:</span></span><br><span class="line">    steps_n = <span class="number">0</span></span><br><span class="line">    dones = [<span class="literal">False</span>] * len(brain_info.agents)</span><br><span class="line">    trans_all = [[] <span class="keyword">for</span> _ <span class="keyword">in</span> range(len(brain_info.agents))]</span><br><span class="line">    rewards_sum = [<span class="number">0</span>] * len(brain_info.agents)</span><br><span class="line">    states = brain_info.vector_observations</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">False</span> <span class="keyword">in</span> dones <span class="keyword">and</span> <span class="keyword">not</span> env.global_done:</span><br><span class="line">        actions = ppo.choose_action(states)</span><br><span class="line">        brain_info = env.step(&#123;</span><br><span class="line">            default_brain_name: actions</span><br><span class="line">        &#125;)[default_brain_name]</span><br><span class="line">        rewards = brain_info.rewards</span><br><span class="line">        local_dones = brain_info.local_done</span><br><span class="line">        max_reached = brain_info.max_reached</span><br><span class="line">        states_ = brain_info.vector_observations</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(len(brain_info.agents)):</span><br><span class="line">            trans_all[i].append([states[i],</span><br><span class="line">                                 actions[i],</span><br><span class="line">                                 np.array([rewards[i]]),</span><br><span class="line">                                 local_dones[i],</span><br><span class="line">                                 max_reached[i]])</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> dones[i]:</span><br><span class="line">                rewards_sum[i] += rewards[i]</span><br><span class="line"></span><br><span class="line">            dones[i] = dones[i] <span class="keyword">or</span> local_dones[i]</span><br><span class="line"></span><br><span class="line">        steps_n += <span class="number">1</span></span><br><span class="line">        states = states_</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> brain_info, trans_all, rewards_sum</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">brain_info = env.reset(train_mode=<span class="literal">False</span>)[default_brain_name]</span><br><span class="line"><span class="keyword">for</span> iteration <span class="keyword">in</span> range(ITER_MAX):</span><br><span class="line">    <span class="keyword">if</span> env.global_done:</span><br><span class="line">        brain_info = env.reset(train_mode=train_mode)[default_brain_name]</span><br><span class="line">    brain_info, trans_all, rewards_sum = simulate(brain_info)</span><br><span class="line">    mean_reward = sum(rewards_sum) / len(rewards_sum)</span><br></pre></td></tr></table></figure>
+<h1 id="踩过的坑">踩过的坑</h1>
+<p>如果直接给 <code>step</code> 传入 <code>dict</code> 的话，尽管每个 <code>brain</code> 的 action 都是 <code>numpy</code> 类型，但在执行完毕后会变为 <code>list</code></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">env.reset(train_mode=<span class="literal">True</span>)</span><br><span class="line">actions = &#123;</span><br><span class="line">    <span class="string">'Brain1'</span>: np.random.randn(<span class="number">2</span>, <span class="number">2</span>),</span><br><span class="line">    <span class="string">'Brain2'</span>: np.random.randn(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">&#125;</span><br><span class="line">print(type(actions[<span class="string">'Brain1'</span>]), type(actions[<span class="string">'Brain2'</span>]))</span><br><span class="line">brain_info = env.step(actions)</span><br><span class="line">print(type(actions[<span class="string">'Brain1'</span>]), type(actions[<span class="string">'Brain2'</span>]))</span><br></pre></td></tr></table></figure>
+<pre><code>&lt;class &#39;numpy.ndarray&#39;&gt; &lt;class &#39;numpy.ndarray&#39;&gt;
+&lt;class &#39;list&#39;&gt; &lt;class &#39;list&#39;&gt;</code></pre>
+<h1 id="关闭连接">关闭连接</h1>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">env.close()</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/wechatpay.jpg" alt="Fisher Chang 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/alipay.jpg" alt="Fisher Chang 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Fisher Chang
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://bluefisher.github.io/2018/12/29/Python-%E4%B8%8E-Unity-mlagents-%E4%BA%A4%E4%BA%92-API/" title="Python 与 Unity mlagents 交互 API">https://bluefisher.github.io/2018/12/29/Python-与-Unity-mlagents-交互-API/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/python/" rel="tag"># python</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/12/26/Clipped-Action-Policy-Gradient/" rel="prev" title="Clipped Action Policy Gradient">
+      <i class="fa fa-chevron-left"></i> Clipped Action Policy Gradient
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/01/02/Distributed-Prioritized-Experience-Replay/" rel="next" title="Distributed Prioritized Experience Replay">
+      Distributed Prioritized Experience Replay <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96-unity-%E7%8E%AF%E5%A2%83"><span class="nav-number">1.</span> <span class="nav-text">初始化 unity 环境</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E5%9F%BA%E7%A1%80-brain-%E4%BF%A1%E6%81%AF"><span class="nav-number">2.</span> <span class="nav-text">获取基础 brain 信息</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%87%8D%E7%BD%AE%E8%AE%AD%E7%BB%83%E7%8E%AF%E5%A2%83%E5%BC%80%E5%A7%8B%E4%BA%A4%E4%BA%92"><span class="nav-number">3.</span> <span class="nav-text">重置训练环境，开始交互</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E6%9C%80%E7%AE%80%E5%8D%95%E7%9A%84%E4%BA%A4%E4%BA%92%E6%96%B9%E5%BC%8F"><span class="nav-number">3.1.</span> <span class="nav-text">一个最简单的交互方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E5%8D%95-brain-%E7%9A%84%E5%A4%8D%E6%9D%82%E4%BE%8B%E5%AD%90%E4%B8%8D%E8%83%BD%E7%9B%B4%E6%8E%A5%E6%89%A7%E8%A1%8C%E5%8F%AA%E6%98%AF%E6%BC%94%E7%A4%BA"><span class="nav-number">3.2.</span> <span class="nav-text">一个单 brain 的复杂例子（不能直接执行，只是演示）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%91"><span class="nav-number">4.</span> <span class="nav-text">踩过的坑</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B3%E9%97%AD%E8%BF%9E%E6%8E%A5"><span class="nav-number">5.</span> <span class="nav-text">关闭连接</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Fisher Chang"
+      src="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
+  <p class="site-author-name" itemprop="name">Fisher Chang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">62</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BlueFisher" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BlueFisher" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/4909165/fish-tree" title="StackOverflow → https:&#x2F;&#x2F;stackoverflow.com&#x2F;users&#x2F;4909165&#x2F;fish-tree" rel="noopener" target="_blank"><i class="fa fa-fw fa-stack-overflow"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://ai.stackexchange.com/users/15525/fish-tree" title="AI.StackExchange → https:&#x2F;&#x2F;ai.stackexchange.com&#x2F;users&#x2F;15525&#x2F;fish-tree" rel="noopener" target="_blank"><i class="fa fa-fw fa-stack-exchange"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blue.fisher.zzy@gmail.com" title="E-Mail → mailto:blue.fisher.zzy@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title">
+      <i class="fa fa-fw fa-link"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://stepneverstop.github.io/" title="https:&#x2F;&#x2F;stepneverstop.github.io&#x2F;" rel="noopener" target="_blank">Keavnn</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fisher Chang</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : '7ruImtbdRTEUvc3qxbGlSc0t-gzGzoHsz',
+      appKey     : 'Vbun7eF790Szhvl9qKC0CCsm',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-logo.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32-logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16-logo.png">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"bluefisher.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="深度强化学习在一系列任务中取得了显着的成功，从机器人的连续控制问题到 Go 和 Atari 等游戏。 但到目前为止，深度强化学习的发展在这些领域中仅局限于单个任务，每个智能体需要对每个任务进行单独的调整和训练。 DeepMind 开发了一套新的训练环境，DMLab-30，在具有相同的动作空间和图像状态环境中进行各种各样的挑战。  而 DeepMind 在 Impala: Scalable d">
+<meta property="og:type" content="article">
+<meta property="og:title" content="IMPALA: Scalable Distributed Deep-RL with Importance Weighted Actor-Learner Architectures">
+<meta property="og:url" content="https://bluefisher.github.io/2019/06/14/IMPALA-Scalable-Distributed-Deep-RL-with-Importance-Weighted-Actor-Learner-Architectures/index.html">
+<meta property="og:site_name" content="Fisher&#39;s Blog">
+<meta property="og:description" content="深度强化学习在一系列任务中取得了显着的成功，从机器人的连续控制问题到 Go 和 Atari 等游戏。 但到目前为止，深度强化学习的发展在这些领域中仅局限于单个任务，每个智能体需要对每个任务进行单独的调整和训练。 DeepMind 开发了一套新的训练环境，DMLab-30，在具有相同的动作空间和图像状态环境中进行各种各样的挑战。  而 DeepMind 在 Impala: Scalable d">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://bluefisher.github.io/images/2019-06-14-IMPALA-Scalable-Distributed-Deep-RL-with-Importance-Weighted-Actor-Learner-Architectures/DMLab-30-06.gif">
+<meta property="og:image" content="https://bluefisher.github.io/images/2019-06-14-IMPALA-Scalable-Distributed-Deep-RL-with-Importance-Weighted-Actor-Learner-Architectures/1560564789534.png">
+<meta property="article:published_time" content="2019-06-14T05:54:09.000Z">
+<meta property="article:modified_time" content="2020-07-22T15:06:48.065Z">
+<meta property="article:author" content="Fisher Chang">
+<meta property="article:tag" content="RL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://bluefisher.github.io/images/2019-06-14-IMPALA-Scalable-Distributed-Deep-RL-with-Importance-Weighted-Actor-Learner-Architectures/DMLab-30-06.gif">
+
+<link rel="canonical" href="https://bluefisher.github.io/2019/06/14/IMPALA-Scalable-Distributed-Deep-RL-with-Importance-Weighted-Actor-Learner-Architectures/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>IMPALA: Scalable Distributed Deep-RL with Importance Weighted Actor-Learner Architectures | Fisher's Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-124171741-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-124171741-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?553ac1673540f93b43866b93cc2d3efe";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Fisher's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Sein heißt Werden<br/>Leben heißt Lernen</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/BlueFisher" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2019/06/14/IMPALA-Scalable-Distributed-Deep-RL-with-Importance-Weighted-Actor-Learner-Architectures/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
+      <meta itemprop="name" content="Fisher Chang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fisher's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          IMPALA: Scalable Distributed Deep-RL with Importance Weighted Actor-Learner Architectures
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-06-14 13:54:09" itemprop="dateCreated datePublished" datetime="2019-06-14T13:54:09+08:00">2019-06-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-07-22 23:06:48" itemprop="dateModified" datetime="2020-07-22T23:06:48+08:00">2020-07-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Reinforcement-Learning/" itemprop="url" rel="index"><span itemprop="name">Reinforcement Learning</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2019/06/14/IMPALA-Scalable-Distributed-Deep-RL-with-Importance-Weighted-Actor-Learner-Architectures/" class="post-meta-item leancloud_visitors" data-flag-title="IMPALA: Scalable Distributed Deep-RL with Importance Weighted Actor-Learner Architectures" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2019/06/14/IMPALA-Scalable-Distributed-Deep-RL-with-Importance-Weighted-Actor-Learner-Architectures/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2019/06/14/IMPALA-Scalable-Distributed-Deep-RL-with-Importance-Weighted-Actor-Learner-Architectures/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>深度强化学习在一系列任务中取得了显着的成功，从机器人的连续控制问题到 Go 和 Atari 等游戏。 但到目前为止，深度强化学习的发展在这些领域中仅局限于单个任务，每个智能体需要对每个任务进行单独的调整和训练。</p>
+<p>DeepMind 开发了一套新的训练环境，DMLab-30，在具有相同的动作空间和图像状态环境中进行各种各样的挑战。</p>
+<p><img src="/images/2019-06-14-IMPALA-Scalable-Distributed-Deep-RL-with-Importance-Weighted-Actor-Learner-Architectures/DMLab-30-06.gif" /></p>
+<p>而 DeepMind 在 <a href="https://arxiv.org/abs/1802.01561" target="_blank" rel="noopener">Impala: Scalable distributed deep-rl with importance weighted actor-learner architectures</a> 论文中，只用一个智能体在多个任务上进行学习。为了训练智能体在多任务上获得更好的效果，需要大吞吐量并能有效利用每个数据点。 为此，DeepMind 开发了一种新的，高度可扩展的分布式体系结构，称为 Importance Weighted Actor-Learner Architecture，它使用一种称为 V-trace 的 off-policy 校正算法。</p>
+<a id="more"></a>
+<h1 id="introduction">Introduction</h1>
+<p>Importance Weighted Actor-Learner Architecture (IMPALA) 可以扩展到数千台机器，而不会牺牲训练稳定性或数据利用率。与基于 A3C 的智能体 （每一个线程会与中心策略参数服务器进行梯度通信）不同，IMPALA 中的 actors 会将经验轨迹（状态、动作和奖励序列）传达给中心 learner 。由于 learner 可以获得完整的经验轨迹，因此作者使用 GPU 在小批量轨迹上进行训练更新，同时并行化所有时间独立的操作。这种类型的解耦结构可以实现非常高的吞吐量。但是，由于 actor 用于生成轨迹的策略可能会在 learner 进行梯度计算时落后于 learner 多次更新后的策略，因此这种训练方式变成 off-policy ，作者引入了 V-trace 用于纠正这种 off-policy actor-critic 算法。</p>
+<p>在使用了这个可伸缩性框架与 V-trace 后，IMPALA 可以以非常高的吞吐量在一秒内处理 250000 帧的图像，比在单台机器上的 A3C 快 30 倍。最关键的是，IMPALA 比 A3C 对于数据利用率更加高效，同时对神经网络结构和参数更加鲁棒。</p>
+<h1 id="impala">IMPALA</h1>
+<p><img src="/images/2019-06-14-IMPALA-Scalable-Distributed-Deep-RL-with-Importance-Weighted-Actor-Learner-Architectures/1560564789534.png" /></p>
+<p>上图使用了 actor-critic 的架构设置来学习策略 <span class="math inline">\(\pi\)</span> 和基准函数 <span class="math inline">\(V^\pi\)</span> 。生成轨迹的过程与学习参数的过程解耦。IMPALA 由多个 actors 组成，重复地生成经验轨迹，同时一个或多个 learner 使用这些经验来 off-policy 地学习 <span class="math inline">\(\pi\)</span> 。上图为 IMPALA 的两种架构，左图使用了一个 learner，每一个 actor 生成轨迹，并通过队列传递给 learner，在下一个回合之前，actor 从 learner 更新策略参数。右图使用了多个同步 learner，策略参数由多个 learner 同步更新和存储。</p>
+<p>在每个轨迹的一开始，actor 将它自身的本地策略 <span class="math inline">\(\mu\)</span> 更新为最新的 learner 策略 <span class="math inline">\(\pi\)</span> 并与环境交互 <span class="math inline">\(n\)</span> 次。之后再把状态、动作和奖励轨迹 <span class="math inline">\(x_{1}, a_{1}, r_{1}, \ldots, x_{n}, a_{n}, r_{n}\)</span> 与相对应的策略分布 <span class="math inline">\(\mu\left(a_{t} | x_{t}\right)\)</span> 和 LSTM 的初始状态传递给队列中。Learner 持续地根据轨迹按批更新它的策略 <span class="math inline">\(\pi\)</span> 。但 learner 的策略 <span class="math inline">\(\pi\)</span> 会在更新的过程中超前 actor 的策略 <span class="math inline">\(\mu\)</span> ，造成 learner 与 actor 之间的策略滞后 (policy-lag) 。</p>
+<h1 id="v-trace">V-trace</h1>
+<p>考虑这样一个由 actor 根据某个策略 <span class="math inline">\(\mu\)</span> 生成的轨迹 <span class="math inline">\(\left(x_{t}, a_{t}, r_{t}\right)_{t=s}^{t=s+n}\)</span> ，我们定义在状态 <span class="math inline">\(x_s\)</span> 处，对于 <span class="math inline">\(V(x_s)\)</span> 的 <strong>n-steps V-trace target</strong> 价值估计，为： <span class="math display">\[
+v_{s} \stackrel{\mathrm{def}}{=} V\left(x_{s}\right)+\sum_{t=s}^{s+n-1} \gamma^{t-s}\left(\prod_{i=s}^{t-1} c_{i}\right) \delta_{t} V \tag{1}
+\]</span> 其中 <span class="math inline">\(\delta_{t} V \stackrel{\mathrm{def}}{=} \rho_{t}\left(r_{t}+\gamma V\left(x_{t+1}\right)-V\left(x_{t}\right)\right)\)</span> 是 <span class="math inline">\(V\)</span> 的时间差分，<span class="math inline">\(\rho_{t} \stackrel{\mathrm{def}}{=} \min \left(\overline{\rho}, \frac{\pi\left(a_{t} | x_{t}\right)}{\mu\left(a_{t} | x_{t}\right)}\right)\)</span> 、<span class="math inline">\(c_{i} \stackrel{\mathrm{def}}{=} \min \left(\overline{c}, \frac{\pi\left(a_{i} | x_{i}\right)}{\mu\left(a_{i} | x_{i}\right)}\right)\)</span> 为截断的重要性采样权重 (truncated importance sampling weights) ，当 <span class="math inline">\(s=t\)</span> 时，我们定义 <span class="math inline">\(\prod_{i=s}^{t-1} c_{i}=1\)</span> ，另外我们假设 <span class="math inline">\(\overline{\rho} \geq \overline{c}\)</span> 。</p>
+<p>如果是 on-policy 情况下 (<span class="math inline">\(\pi=\mu\)</span>) ，假设 <span class="math inline">\(\overline{c} \geq 1\)</span> ，那么所有的 <span class="math inline">\(c_{i}=1\)</span> ，<span class="math inline">\(\rho_{t}=1\)</span> ，公式 1 可以重写为： <span class="math display">\[
+\begin{aligned} v_{s} &amp;=V\left(x_{s}\right)+\sum_{t=s}^{s+n-1} \gamma^{t-s}\left(r_{t}+\gamma V\left(x_{t+1}\right)-V\left(x_{t}\right)\right) \\ 
+&amp;=\left[ \sum_{t=s}^{s+n-1} \gamma^{t-s} r_{t} \right] +\gamma^{n} V\left(x_{s+n}\right) \end{aligned}
+\]</span> 即为标准的 on-policy n-steps Bellman target。因此在 on-policy 情况下，V-trace 会衰减到 on-policy n-steps Bellman update。</p>
+<p>公式 1 中的截断重要性采样权重 <span class="math inline">\(c_i\)</span> 与 <span class="math inline">\(\rho_i\)</span> 有不同的作用。</p>
+<p><span class="math inline">\(\rho_i\)</span> 只出现在时间差分 <span class="math inline">\(\delta_{t} V\)</span> 中，定义了这个更新规则的<em>不动点</em>。 在表格形式下，值函数不需要近似，可以完全被表示（ <span class="math inline">\(V(x_s)=v_s\)</span> ，即 <span class="math inline">\(\delta_{t} V=0\)</span> ），那么这个更新的不动点是一个值函数 <span class="math inline">\(V^{\pi_{\overline{\rho}}}\)</span> ，这个值函数对应某个策略 <span class="math inline">\(\pi_{\overline{\rho}}\)</span> ： <span class="math display">\[
+\pi_{\overline{\rho}}(a | x) \stackrel{\mathrm{def}}{=} \frac{\min (\overline{\rho} \mu(a | x), \pi(a | x))}{\sum_{b \in A} \min (\overline{\rho} \mu(b | x), \pi(b | x))}
+\]</span> 所以当 <span class="math inline">\(\overline{\rho}\)</span> 无限大时，这个不动点为目标策略的值函数 <span class="math inline">\(V^{\pi}\)</span> ，对应的策略 <span class="math inline">\(\pi\)</span> 为： <span class="math display">\[
+\pi(a|x) = \frac{\pi(a|x)}{\sum_{b\in A}\pi(b|x)}
+\]</span> 如果 <span class="math inline">\(\overline{\rho}\)</span> 不是无限大时，这个值函数 <span class="math inline">\(V^{\pi_{\overline{\rho}}}\)</span> 不动点所对应的策略 <span class="math inline">\(\pi_{\overline{\rho}}\)</span> 在 <span class="math inline">\(\mu\)</span> 与 <span class="math inline">\(\pi\)</span> 之间，当 <span class="math inline">\(\overline{\rho}\)</span> 接近零，不动点变为 <span class="math inline">\(V^\mu\)</span> 。</p>
+<p>对于乘积 <span class="math inline">\(c_{s} \ldots c_{t-1}\)</span> ，它们衡量了 t 时刻的时间差分 <span class="math inline">\(\delta_{t} V\)</span> 如何影响之前 s 时刻价值函数的更新。<span class="math inline">\(\pi\)</span> 与 <span class="math inline">\(\mu\)</span> 越不相同，这个乘积的方差就越大，作者使用了截断 <span class="math inline">\(\overline{c}\)</span> 来降低方差，但并不影响收敛到哪个价值函数上，因为这只与 <span class="math inline">\(\overline{\rho}\)</span> 有关。</p>
+<p><strong>总结一下， <span class="math inline">\(\overline{\rho}\)</span> 影响收敛到的价值函数是更靠近 <span class="math inline">\(\pi\)</span> 策略还是更靠近 <span class="math inline">\(\mu\)</span> 策略， <span class="math inline">\(\overline{c}\)</span> 影响收敛的速度。</strong></p>
+<p><strong>备注 1.</strong> V-trace targets 可以递归地计算： <span class="math display">\[
+v_{s}=V\left(x_{s}\right)+\delta_{s} V+\gamma c_{s}\left(v_{s+1}-V\left(x_{s+1}\right)\right)
+\]</span> <strong>备注 2.</strong> 我们可以引入一个衰减因子 <span class="math inline">\(\lambda\in[0,1]\)</span> ：<span class="math inline">\(c_{i}=\lambda \min \left(\overline{c}, \frac{\pi\left(a_{i} | x_{i}\right)}{\mu\left(a_{i} | x_{i}\right)}\right)\)</span> 。在 on-policy 情况下，<span class="math inline">\(n=\infty\)</span> 时，V-trace 就是 <span class="math inline">\(TD(\lambda)\)</span>。</p>
+<h2 id="v-trace-actor-critic-algorithm">V-trace Actor-critic Algorithm</h2>
+<p>考虑参数化的价值函数 <span class="math inline">\(V_\theta\)</span> 与当前策略 <span class="math inline">\(\pi_w\)</span> ，actors 根据行为策略 <span class="math inline">\(\mu\)</span> 生成轨迹，V-trace targets <span class="math inline">\(v_s\)</span> 由公式 1 定义。在训练的 <span class="math inline">\(s\)</span> 时刻，价值参数 <span class="math inline">\(\theta\)</span> 通过最小化 <span class="math inline">\(V_\theta(x_s)\)</span> 与 <span class="math inline">\(v_s\)</span> 之间的 l2 loss ，朝着如下方向更新： <span class="math display">\[
+\left(v_{s}-V_{\theta}\left(x_{s}\right)\right) \nabla_{\theta} V_{\theta}\left(x_{s}\right)
+\]</span> 策略参数 <span class="math inline">\(w\)</span> 朝如下方向更新： <span class="math display">\[
+\rho_{s} \nabla_{\omega} \log \pi_{\omega}\left(a_{s} | x_{s}\right)\left(r_{s}+\gamma v_{s+1}-V_{\theta}\left(x_{s}\right)\right)
+\]</span> 为了避免过早收敛，我们可以像 A3C 一样在梯度方向上加上 entropy bonus： <span class="math display">\[
+-\nabla_{\omega} \sum_{a} \pi_{\omega}\left(a | x_{s}\right) \log \pi_{\omega}\left(a | x_{s}\right)
+\]</span></p>
+<h2 id="v-trace-与-qpi-lambda-retracelambda-比较">V-trace 与 <span class="math inline">\(Q^\pi (\lambda)\)</span> , Retrace(<span class="math inline">\(\lambda\)</span>) 比较</h2>
+<p>V-trace 是基于 <a href="http://papers.nips.cc/paper/6538-safe-and-efficient-off-policy-reinf" target="_blank" rel="noopener">Safe and efficient off-policy reinforcement learning</a> 一文中的 Retrace(<span class="math inline">\(\lambda\)</span>) 算法，而 Retrace(<span class="math inline">\(\lambda\)</span>) 又是基于 <a href="https://link.springer.com/chapter/10.1007/978-3-319-46379-7_21" target="_blank" rel="noopener">Q(<span class="math inline">\(\lambda\)</span>) with Off-Policy Corrections</a> 中的 <span class="math inline">\(Q^\pi (\lambda)\)</span> 算法，本小节简单整理一下这三个算法的演进路线。</p>
+<h2 id="qlambda-with-off-policy-corrections-qpi-lambda">Q(<span class="math inline">\(\lambda\)</span>) with Off-Policy Corrections: <span class="math inline">\(Q^\pi (\lambda)\)</span></h2>
+<p>给定一个目标策略 <span class="math inline">\(\pi\)</span> ，和一个生成回报的行为策略 <span class="math inline">\(\mu\)</span> ，定义 <em>off-policy corrected return operator</em> 操作 <span class="math inline">\(\mathcal{R}^{\pi, \mu}\)</span> ：估计一种回报，该回报应该是由策略 <span class="math inline">\(\pi\)</span> 生成的，同时使用当前 <span class="math inline">\(Q^\pi\)</span> 的估计 <span class="math inline">\(Q\)</span> 来修正。 <span class="math display">\[
+\left(\mathcal{R}^{\pi, \mu} Q\right)(x, a) \stackrel{\operatorname{def}}{=} r(x, a)+\mathbb{E}_{\mu}\left[\sum_{t \geq 1}^{\top} \gamma^{t}\left(r_{t}+\mathbb{E}_{\pi} Q\left(x_{t}, \cdot\right)-Q\left(x_{t}, a_{t}\right)\right)\right]
+\]</span> 其中 <span class="math inline">\(\mathbb{E}_{\pi} Q(x, \cdot) \equiv \sum_{a \in \mathcal{A}} \pi(a | x) Q(x, a)\)</span> 。 <span class="math inline">\(\mathcal{R}^{\pi, \mu}\)</span> 提供了常规的累积期望带有衰减的奖励和，但是轨迹中的每个奖励值都会有一个 off-policy 修正，这个修正我们定义为 <span class="math inline">\(Q\)</span> 值的期望与 <span class="math inline">\(Q\)</span> 值的差。 这个时候，<span class="math inline">\(Q^\pi\)</span> 对于任何行为策略 <span class="math inline">\(\mu\)</span> 来说即为 <span class="math inline">\(\mathcal{R}^{\pi, \mu}\)</span> 最终收敛的不动点。</p>
+<p>对于 n-step and -versions 的 <span class="math inline">\(\mathcal{R}^{\pi, \mu}\)</span> ，定义为： <span class="math display">\[
+\begin{align*} 
+\mathcal{R}_{\lambda}^{\pi, \mu} Q \stackrel{\mathrm{def}}{=} &amp; A^{\lambda}\left[\mathcal{R}_{n}^{\pi, \mu}\right] \tag{2} \\ 
+\left(\mathcal{R}_{n}^{\pi, \mu} Q\right)(x, a) \stackrel{\mathrm{def}}{=} &amp; r(x, a)+\mathbb{E}_{\mu}\left[\sum_{t=1}^{n} \left(\gamma^{t}\left(r_{t}+\mathbb{E}_{\pi} Q\left(x_{t}, \cdot\right)-Q\left(x_{t}, a_{t}\right)\right) \right)
++ \gamma^{n+1} \mathbb{E}_{\pi} Q\left(x_{n+1} \cdot \cdot\right) \right] 
+\end{align*}
+\]</span> 其中定义操作 <span class="math inline">\(A^{\lambda}[f(n)] \stackrel{\operatorname{def}}{=}(1-\lambda) \sum_{n \geq 0} \lambda^{n} f(n)\)</span> 即为常规的 TD(<span class="math inline">\(\lambda\)</span>) 权重累加系数。</p>
+<p>理论上的更新算法很简单： <span class="math display">\[
+Q_{k+1}=\mathcal{R}_{\lambda}^{\pi_{k}, \mu_{k}} Q_{k}
+\]</span> <span class="math inline">\(\left(Q_{k}\right)_{k \in \mathbb{N}}\)</span> 是一系列对于 <span class="math inline">\(Q^{\pi_{k}}\)</span> 的估计，其中 <span class="math inline">\(\pi_k\)</span> 是第 <span class="math inline">\(k\)</span> 个临时的目标策略。</p>
+<p>然而在实际操作过程中，我们可以将公式 (2) 改写成： <span class="math display">\[
+\begin{aligned} 
+\mathcal{R}_{\lambda}^{\pi, \mu} Q(x, a) &amp;=Q(x, a)+\mathbb{E}_{\mu}\left[\sum_{t \geq 0}(\lambda \gamma)^{t} \delta_{t}^{\pi}\right] \\ 
+\delta_{t}^{\pi} &amp;\stackrel{\text { def }}{=} r_{t}+\gamma \mathbb{E}_{\pi} Q\left(x_{t+1}, \cdot\right)-Q\left(x_{t}, a_{t}\right) 
+\end{aligned}
+\]</span> 其中 <span class="math inline">\(\delta_{t}^{\pi}\)</span> 称为 expected TD-error。离线更新（需要等待一个完整的 episode 结束）的向前视角即为： <span class="math display">\[
+Q_{k+1}(x, a) \leftarrow Q_{k}(x, a)+\alpha_{k} \sum_{t=0}^{T_{k}}(\gamma \lambda)^{t} \delta_{t}^{\pi_{k}}
+\]</span> 当然也可以使用在线更新的后向视角形式，这需要用到资格迹，论文中算法 (1) 即为这种更新模式。</p>
+<p>论文在 Related Work 中与 SARSA(<span class="math inline">\(\lambda\)</span>) 做了一下比较， SARSA(<span class="math inline">\(\lambda\)</span>) 对 <span class="math inline">\(Q\)</span> 的更新为： <span class="math display">\[
+Q_{s+1}\left(x_{s}, a_{s}\right) \leftarrow Q_{s}\left(x_{s}, a_{s}\right)+\alpha_{s}(A^{\lambda} R_{s}^{(n)}-Q\left(x_{s}, a_{s}\right)) \\
+R_{s}^{(n)}=\sum_{t=s}^{s+n} \gamma^{t-s} r_{t}+\gamma^{n+1} Q\left(x_{s+n+1}, a_{s+n+1}\right)
+\]</span> <span class="math inline">\(\Delta_s\)</span> 为 <span class="math inline">\(t\)</span> 时刻的更新总量，也可以像上文一样重写为 one-step TD-errors 的形式： <span class="math display">\[
+\begin{aligned} \Delta_{s} &amp;=\sum_{t \geq s}(\lambda \gamma)^{t-s} \delta_{t} \\ \delta_{t} &amp;=r_{t}+\gamma Q\left(x_{t+1}, a_{t+1}\right)-Q\left(x_{t}, a_{t}\right) \end{aligned}
+\]</span> 该形式的推导过程与 GAE 非常相似。</p>
+<p>论文最后比较了一下几个常见的 -return 算法，我们只列出比较重要的几个：</p>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 35%" />
+<col style="width: 35%" />
+<col style="width: 8%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>算法</th>
+<th>n-step 回报</th>
+<th>更新规则</th>
+<th>固定点</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>TD()<br/>(on-policy)</td>
+<td><span class="math inline">\(\sum_{t=s}^{s+n} \gamma^{t-s} r_{t}+\gamma^{n+1} V\left(x_{s+n+1}\right)\)</span></td>
+<td><span class="math inline">\(\sum_{t \geq s}(\lambda \gamma)^{t-s} \delta_{t}\)</span><br/><span class="math inline">\(\delta_{t}=r_{t}+\gamma V\left(x_{t+1}\right)-V\left(x_{t}\right)\)</span></td>
+<td><span class="math inline">\(V^{\mu}\)</span></td>
+</tr>
+<tr class="even">
+<td>SARSA()<br/>(on-policy)</td>
+<td><span class="math inline">\(\sum_{t=s}^{s+n} \gamma^{t-s} r_{t}+\gamma^{n+1} Q\left(x_{s+n+1}, a_{s+n+1}\right)\)</span></td>
+<td><span class="math inline">\(\sum_{t \geq s}(\lambda \gamma)^{t-s} \delta_{t}\)</span><br/><span class="math inline">\(\delta_{t}=r_{t}+\gamma Q\left(x_{t+1}, a_{t+1}\right)-Q\left(x_{t}, a_{t}\right)\)</span></td>
+<td><span class="math inline">\(Q^{\mu}\)</span></td>
+</tr>
+<tr class="odd">
+<td>Expected SARSA()<br/>(on-policy)</td>
+<td><span class="math inline">\(\sum_{t=s}^{s+n} \gamma^{t-s} r_{t}+\gamma^{n+1} \mathbb{E}_{\mu} Q\left(x_{s+n+1}, \cdot\right)\)</span></td>
+<td><span class="math inline">\(\sum_{t \geq s}(\lambda \gamma)^{t-s} \delta_{t}+\mathbb{E}_{\mu} Q\left(x_{s}, \cdot\right)-Q\left(x_{s}, a_{s}\right)\)</span><br/><span class="math inline">\(\delta_{t}=r_{t}+\gamma \mathbb{E}_{\mu} Q\left(x_{t+1}, \cdot\right)-\mathbb{E}_{\mu} Q\left(x_{t}, \cdot\right)\)</span></td>
+<td><span class="math inline">\(Q^{\mu}\)</span></td>
+</tr>
+<tr class="even">
+<td>General Q()<br/>(off-policy)</td>
+<td><span class="math inline">\(\sum_{t=s}^{s+n} \gamma^{t-s} r_{t}+\gamma^{n+1} \mathbb{E}_{\pi} Q\left(x_{s+n+1}, \cdot\right)\)</span></td>
+<td><span class="math inline">\(\sum_{t \geq s}(\lambda \gamma)^{t-s} \delta_{t}+\mathbb{E}_{\pi} Q\left(x_{s}, \cdot\right)-Q\left(x_{s}, a_{s}\right)\)</span><br/><span class="math inline">\(\delta_{t}=r_{t}+\gamma \mathbb{E}_{\pi} Q\left(x_{t+1}, \cdot\right)-\mathbb{E}_{\pi} Q\left(x_{t}, \cdot\right)\)</span></td>
+<td><span class="math inline">\(Q^{\mu, \pi}\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(Q^\pi(\lambda)\)</span><br/>(on/off-policy)</td>
+<td><span class="math inline">\(\sum_{t=s}^{s+n} \gamma^{t-s}\left[r_{t}+\mathbb{E}_{\pi} Q\left(x_{t}, \cdot\right)-Q\left(x_{t}, a_{t}\right)\right]\)</span><br/><span class="math inline">\(+\gamma^{n+1} \mathbb{E}_{\pi} Q\left(x_{s+n+1}, \cdot\right)\)</span></td>
+<td><span class="math inline">\(\sum_{t \geq s}(\lambda \gamma)^{t-s} \delta_{t}\)</span><br/><span class="math inline">\(\delta_{t}=r_{t}+\gamma \mathbb{E}_{\pi} Q\left(x_{t+1}, \cdot\right)-Q\left(x_{t}, a_{t}\right)\)</span></td>
+<td><span class="math inline">\(Q^\pi\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>通过 Expected SARSA() 与 <span class="math inline">\(Q^\pi(\lambda)\)</span> 的对比可以看出，<span class="math inline">\(Q^\pi(\lambda)\)</span> 只是多了对即时奖励的修正部分</p>
+<h2 id="safe-and-efficient-off-policy-reinforcement-learning-retracelambda">Safe and efficient off-policy reinforcement learning: Retrace(<span class="math inline">\(\lambda\)</span>)</h2>
+<p>然而，<span class="math inline">\(Q^\pi (\lambda)\)</span> 算法中的行为策略 <span class="math inline">\(\mu\)</span> 与目标策略 <span class="math inline">\(\pi\)</span> 不能差别太大（<span class="math inline">\(\|\pi-\mu\|_{1} \leq \frac{1-\gamma}{\lambda \gamma}\)</span>），也就导致了 Q(<span class="math inline">\(\lambda\)</span>) 并不“安全”。Retrace(<span class="math inline">\(\lambda\)</span>) 在 Q(<span class="math inline">\(\lambda\)</span>) 的基础上进行了改进，有三个有点：</p>
+<ol type="1">
+<li>低方差</li>
+<li>安全，可以利用从任意的行为策略中生成的轨迹，而不需要去关心它到底有多 off-policyness</li>
+<li>高效，可以高效地利用与目标策略接近的行为策略所产生的轨迹</li>
+</ol>
+<p>在论文中，作者总结了一个通用的可以比较各种 return-based off-policy 算法的操作为： <span class="math display">\[
+\mathcal{R} Q(x, a) :=Q(x, a)+\mathbb{E}_{\mu}\left[\sum_{t \geq 0} \gamma^{t}\left(\prod_{s=1}^{t} c_{s}\right)\left(r_{t}+\gamma \mathbb{E}_{\pi} Q\left(x_{t+1}, \cdot\right)-Q\left(x_{t}, a_{t}\right)\right)\right]
+\]</span> 对于重要性采样来说，<span class="math inline">\(c_{s}=\frac{\pi\left(a_{s} | x_{s}\right)}{\mu\left(a_{s} | x_{s}\right)}\)</span> ，但会有非常大（甚至是无限）的方差；</p>
+<p>对于 off-policy <span class="math inline">\(Q^\pi(\lambda)\)</span> ，<span class="math inline">\(c_{s}=\lambda\)</span> ，但必须满足 <span class="math inline">\(\|\pi-\mu\|_{1} \leq \frac{1-\gamma}{\lambda \gamma}\)</span> 否则无法工作；</p>
+<p>对于 TB(<span class="math inline">\(\lambda\)</span>) ，<span class="math inline">\(c_s=\lambda \pi(a_s|x_s)\)</span> ，但在当 <span class="math inline">\(\mu\)</span> 与 <span class="math inline">\(\pi\)</span> 比较接近的时候（即比较接近 on-policy 的时候），把 traces 给截断就不是很高效了；</p>
+<p>对于 Retrace(<span class="math inline">\(\lambda\)</span>) ，<span class="math inline">\(c_{s}=\lambda \min \left(1, \frac{\pi\left(a_{s} | x_{s}\right)}{\mu\left(a_{s} | x_{s}\right)}\right)\)</span> ，它将重要性比率截断至 1 。</p>
+<p>而 V-trace 和 Retrace(<span class="math inline">\(\lambda\)</span>) 类似，只不过 Retrace(<span class="math inline">\(\lambda\)</span>) 估计的是 <span class="math inline">\(Q\)</span> 函数，这里估计的是 <span class="math inline">\(V\)</span> 函数，因此叫 V-trace。</p>
+<h1 id="参考">参考</h1>
+<p>Espeholt, L., Soyer, H., Munos, R., Simonyan, K., Mnih, V., Ward, T., ... &amp; Legg, S. (2018). Impala: Scalable distributed deep-rl with importance weighted actor-learner architectures. <em>arXiv preprint arXiv:1802.01561</em>.</p>
+<p>Harutyunyan, Anna, Marc G Bellemare, Tom Stepleton, and Remi Munos. “Q() with Oﬀ-Policy Corrections,” n.d., 15.</p>
+<p>Munos, Remi, Tom Stepleton, Anna Harutyunyan, and Marc Bellemare. “Safe and Efficient Off-Policy Reinforcement Learning,” n.d., 9.</p>
+<p><a href="https://deepmind.com/blog/impala-scalable-distributed-deeprl-dmlab-30/" target="_blank" rel="noopener" class="uri">https://deepmind.com/blog/impala-scalable-distributed-deeprl-dmlab-30/</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/34074929" target="_blank" rel="noopener" class="uri">https://zhuanlan.zhihu.com/p/34074929</a></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/wechatpay.jpg" alt="Fisher Chang 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/alipay.jpg" alt="Fisher Chang 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Fisher Chang
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://bluefisher.github.io/2019/06/14/IMPALA-Scalable-Distributed-Deep-RL-with-Importance-Weighted-Actor-Learner-Architectures/" title="IMPALA: Scalable Distributed Deep-RL with Importance Weighted Actor-Learner Architectures">https://bluefisher.github.io/2019/06/14/IMPALA-Scalable-Distributed-Deep-RL-with-Importance-Weighted-Actor-Learner-Architectures/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/RL/" rel="tag"># RL</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/06/12/Diversity-is-All-You-Need-Learning-Skills-without-a-Reward-Function/" rel="prev" title="Diversity is All You Need: Learning Skills without a Reward Function">
+      <i class="fa fa-chevron-left"></i> Diversity is All You Need: Learning Skills without a Reward Function
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/08/22/Recurrent-Experience-Replay-In-Distributed-Reinforcement-Learning/" rel="next" title="Recurrent Experience Replay In Distributed Reinforcement Learning">
+      Recurrent Experience Replay In Distributed Reinforcement Learning <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#impala"><span class="nav-number">2.</span> <span class="nav-text">IMPALA</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#v-trace"><span class="nav-number">3.</span> <span class="nav-text">V-trace</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#v-trace-actor-critic-algorithm"><span class="nav-number">3.1.</span> <span class="nav-text">V-trace Actor-critic Algorithm</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#v-trace-%E4%B8%8E-qpi-lambda-retracelambda-%E6%AF%94%E8%BE%83"><span class="nav-number">3.2.</span> <span class="nav-text">V-trace 与 \(Q^\pi (\lambda)\) , Retrace(\(\lambda\)) 比较</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#qlambda-with-off-policy-corrections-qpi-lambda"><span class="nav-number">3.3.</span> <span class="nav-text">Q(\(\lambda\)) with Off-Policy Corrections: \(Q^\pi (\lambda)\)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#safe-and-efficient-off-policy-reinforcement-learning-retracelambda"><span class="nav-number">3.4.</span> <span class="nav-text">Safe and efficient off-policy reinforcement learning: Retrace(\(\lambda\))</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Fisher Chang"
+      src="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
+  <p class="site-author-name" itemprop="name">Fisher Chang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">62</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/BlueFisher" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;BlueFisher" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://stackoverflow.com/users/4909165/fish-tree" title="StackOverflow → https:&#x2F;&#x2F;stackoverflow.com&#x2F;users&#x2F;4909165&#x2F;fish-tree" rel="noopener" target="_blank"><i class="fa fa-fw fa-stack-overflow"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://ai.stackexchange.com/users/15525/fish-tree" title="AI.StackExchange → https:&#x2F;&#x2F;ai.stackexchange.com&#x2F;users&#x2F;15525&#x2F;fish-tree" rel="noopener" target="_blank"><i class="fa fa-fw fa-stack-exchange"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:blue.fisher.zzy@gmail.com" title="E-Mail → mailto:blue.fisher.zzy@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i></a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title">
+      <i class="fa fa-fw fa-link"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://stepneverstop.github.io/" title="https:&#x2F;&#x2F;stepneverstop.github.io&#x2F;" rel="noopener" target="_blank">Keavnn</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fisher Chang</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-svg.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : '7ruImtbdRTEUvc3qxbGlSc0t-gzGzoHsz',
+      appKey     : 'Vbun7eF790Szhvl9qKC0CCsm',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
