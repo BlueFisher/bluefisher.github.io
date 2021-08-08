@@ -176,6 +176,114 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2020/04/16/Overleaf-%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
+      <meta itemprop="name" content="Fisher Chang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fisher's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/04/16/Overleaf-%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE/" class="post-title-link" itemprop="url">Overleaf 服务器配置</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-04-16 21:47:59" itemprop="dateCreated datePublished" datetime="2020-04-16T21:47:59+08:00">2020-04-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-05-01 15:38:45" itemprop="dateModified" datetime="2020-05-01T15:38:45+08:00">2020-05-01</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/04/16/Overleaf-%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE/" class="post-meta-item leancloud_visitors" data-flag-title="Overleaf 服务器配置" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/04/16/Overleaf-%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/04/16/Overleaf-%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <ol type="1">
+<li><p>首先根据官方教程 <a href="https://docs.docker.com/engine/install/ubuntu/" target="_blank" rel="noopener">https://docs.docker.com/engine/install/ubuntu/</a> 确保服务器已经安装了 Docker，同时根据 https://docs.docker.com/compose/install/ 安装 Docker Compose。</p></li>
+<li><p>拉取最新的 overleaf 服务器版本</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker pull sharelatex/sharelatex</span><br></pre></td></tr></table></figure></li>
+<li><p>在用户目录 <code>~</code> 下新建文件夹 <code>~/sharelatex/, ~/sharelatex/sharelatex_data/, ~/sharelatex/mongo_data/, ~/sharelatex/redis_data/</code></p></li>
+<li><p>下载 <a href="https://github.com/overleaf/overleaf/blob/master/docker-compose.yml" target="_blank" rel="noopener">docker-compose.yml</a> 文件，并存在 <code>~/sharelatex/​</code> 文件夹中</p></li>
+<li><p>根据需要修改 docker-compose.yml 文件，可以更改服务器映射的端口号 <code>ports</code> ，修改 sharelatex, mongo 和 redis 的<code>volumes</code> 到步骤3创建的文件夹中。注意 <code>SHARELATEX_APP_NAME</code> 中不能有特殊字符，否则可能会解析失败。</p></li>
+<li><p>进入 <code>~sharelatex</code> 启动 docker-compose.yml</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker-compose up</span></span><br></pre></td></tr></table></figure></li>
+<li><p>由于默认安装的是最小版本 TeXLive，如果要安装完整包，执行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> docker <span class="built_in">exec</span> sharelatex tlmgr install scheme-full</span></span><br></pre></td></tr></table></figure>
+<p>或者也可以安装任意的单个包，只需要把 <code>sheme-full</code> 替换为包的名称即可</p></li>
+<li><p>第一次启动镜像后，访问 <code>/launchpad</code> 页面设置管理员账号</p></li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2020/03/25/tracing-in-tf-function/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1115,114 +1223,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2019/03/22/Soft-Actor-Critic/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
-      <meta itemprop="name" content="Fisher Chang">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Fisher's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2019/03/22/Soft-Actor-Critic/" class="post-title-link" itemprop="url">Soft Actor-Critic</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2019-03-22 10:22:50" itemprop="dateCreated datePublished" datetime="2019-03-22T10:22:50+08:00">2019-03-22</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2019-07-23 16:05:54" itemprop="dateModified" datetime="2019-07-23T16:05:54+08:00">2019-07-23</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Reinforcement-Learning/" itemprop="url" rel="index"><span itemprop="name">Reinforcement Learning</span></a>
-                </span>
-            </span>
-
-          
-            <span id="/2019/03/22/Soft-Actor-Critic/" class="post-meta-item leancloud_visitors" data-flag-title="Soft Actor-Critic" title="阅读次数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span class="leancloud-visitors-count"></span>
-            </span>
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="fa fa-comment-o"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2019/03/22/Soft-Actor-Critic/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2019/03/22/Soft-Actor-Critic/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>无模型的深度强化学习 (model-free deep reinforcement learning) 算法尽管非常多，效果也不错，但由于异策略采样与神经网络这种高维非线性函数近似的结合，使得 DRL 一直会有两个非常大的问题：采样复杂度大、对超参数非常敏感。在 <em><a href="https://arxiv.org/abs/1812.05905" target="_blank" rel="noopener">Soft Actor-Critic Algorithms and Applications</a></em> 论文中，伯克利与 Google Brain 联合提出了 Soft Actor-Critic，一种基于最大熵强化学习框架的异策略 actor-critic 算法。SAC 非常的稳定，可以在不同初始权重的情况下得到取得相同的性能。SAC 有三个显著的特点：</p>
-<ol type="1">
-<li>策略与值函数分离的 actor-critic 框架</li>
-<li>异策略采样可以更有效地复用历史采集到的数据</li>
-<li>熵的最大化可以让算法更稳定，同时还能鼓励探索，找到多个都是最优的 near-optimal 行为。</li>
-</ol>
-<p>最大熵强化学习可以参考 <a href="https://bluefisher.github.io/2018/11/13/Reinforcement-Learning-with-Deep-Energy-Based-Policies/">Reinforcement Learning with Deep Energy-Based Policies</a> 。<em><a href="https://arxiv.org/abs/1801.01290" target="_blank" rel="noopener">Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor</a></em> 实际上最先提出了 SAC 算法，但本篇论文在此基础上做了一定的修改，尤其是改进了对 temperature hyperparmeter 敏感的问题。完整代码可见 <a href="https://github.com/BlueFisher/RL-SAC-with-Unity" target="_blank" rel="noopener">https://github.com/BlueFisher/RL-SAC-with-Unity</a>.</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/03/22/Soft-Actor-Critic/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1294,7 +1294,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">62</span>
+          <span class="site-state-item-count">63</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
