@@ -176,6 +176,225 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2018/05/08/DQN-%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
+      <meta itemprop="name" content="Fisher Chang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fisher's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/05/08/DQN-%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/" class="post-title-link" itemprop="url">DQN 代码实现</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-05-08 15:21:37" itemprop="dateCreated datePublished" datetime="2018-05-08T15:21:37+08:00">2018-05-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2018-12-30 16:54:21" itemprop="dateModified" datetime="2018-12-30T16:54:21+08:00">2018-12-30</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Reinforcement-Learning/" itemprop="url" rel="index"><span itemprop="name">Reinforcement Learning</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/05/08/DQN-%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/" class="post-meta-item leancloud_visitors" data-flag-title="DQN 代码实现" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/05/08/DQN-%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/05/08/DQN-%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>有了 <a href="https://bluefisher.github.io/2018/05/07/Deep-Q-Network/">Deep Q-Network</a> 的理论基础，根据文末的算法，就可以实现DQN。<a href="https://github.com/BlueFisher/Reinforcement-Learning/tree/master/Deep_Q_Network" target="_blank" rel="noopener">直接看所有代码</a></p>
+<p>整个程序框架为：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 经验记忆库</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Memory</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, batch_size, max_size)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">store_transition</span><span class="params">(self, s, a, r, s_, done)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get_mini_batches</span><span class="params">(self)</span>:</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DQN</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, sess, s_dim, a_dim, batch_size, gamma, lr, epsilon, replace_target_iter)</span>:</span></span><br><span class="line">    <span class="comment"># 利用 epsilon-greedy 来选取下一个行为</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">choose_action</span><span class="params">(self, s)</span>:</span></span><br><span class="line">    <span class="comment"># 生成模型</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_generate_model</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="comment"># 生成模型过程中建立两个神经网络</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_build_net</span><span class="params">(self, s, scope, trainable)</span>:</span></span><br><span class="line">    <span class="comment"># 存储一个episode并且利用经验回放进行学习</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">store_transition_and_learn</span><span class="params">(self, s, a, r, s_, done)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_learn</span><span class="params">(self)</span>:</span></span><br></pre></td></tr></table></figure>
+<p>主函数执行：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">rl = DQN(</span><br><span class="line">    sess=sess,</span><br><span class="line">    s_dim=env.observation_space.shape[<span class="number">0</span>], <span class="comment"># 状态维度</span></span><br><span class="line">    a_dim=env.action_space.n, <span class="comment"># 行为one hot形式维度</span></span><br><span class="line">    batch_size=<span class="number">128</span>,</span><br><span class="line">    gamma=<span class="number">0.99</span>,</span><br><span class="line">    lr=<span class="number">0.01</span>, <span class="comment"># learning rate</span></span><br><span class="line">    epsilon=<span class="number">0.1</span>, <span class="comment"># epsilon-greedy</span></span><br><span class="line">    replace_target_iter=<span class="number">300</span> <span class="comment"># 经历C步后更新target参数</span></span><br><span class="line">)</span><br><span class="line">tf.global_variables_initializer().run()</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i_episode <span class="keyword">in</span> range(<span class="number">1000</span>):</span><br><span class="line">    s = env.reset()</span><br><span class="line">    <span class="comment"># 一次episode的奖励总和</span></span><br><span class="line">    r_sum = <span class="number">0</span></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="comment"># 选行为</span></span><br><span class="line">        a = rl.choose_action(s)</span><br><span class="line">        <span class="comment"># 根据行为获得下个状态的信息</span></span><br><span class="line">        s_, r, done, _ = env.step(a)</span><br><span class="line"></span><br><span class="line">        rl.store_transition_and_learn(s, a, r, s_, done)</span><br><span class="line"></span><br><span class="line">        r_sum += <span class="number">1</span></span><br><span class="line">        <span class="keyword">if</span> done:</span><br><span class="line">            print(i_episode, r_sum)</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">        s = s_</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/05/08/DQN-%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2018/05/07/Deep-Q-Network/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/6104460?v=3&s=200">
+      <meta itemprop="name" content="Fisher Chang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fisher's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/05/07/Deep-Q-Network/" class="post-title-link" itemprop="url">Deep Q-Network</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-05-07 21:22:01" itemprop="dateCreated datePublished" datetime="2018-05-07T21:22:01+08:00">2018-05-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2018-12-30 21:10:12" itemprop="dateModified" datetime="2018-12-30T21:10:12+08:00">2018-12-30</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Reinforcement-Learning/" itemprop="url" rel="index"><span itemprop="name">Reinforcement Learning</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/05/07/Deep-Q-Network/" class="post-meta-item leancloud_visitors" data-flag-title="Deep Q-Network" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/05/07/Deep-Q-Network/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/05/07/Deep-Q-Network/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><strong>Deep Q-Network (DQN)</strong> 算法在 <a href="https://bluefisher.github.io/2018/05/22/%E6%97%A0%E6%A8%A1%E5%9E%8B%E6%8E%A7%E5%88%B6-Model-Free-Control/">Q-Learning</a>  算法的基础上，利用 <strong>深度卷积神经网络来逼近值函数</strong>，将强化学习与深度学习相结合，估计出最优行为价值函数 (optimal action-value function) <span class="math display">\[
+Q^*(s,a) = \max_\pi \mathbb{E}[G_t|s_t=s, a_t=a, \pi]
+\]</span> 然而通过深度学习的视角来进行强化学习面临着许多问题，一个是深度学习程序需要大量的人为标记的数据，但强化学习通常需要在大量稀疏的、延迟的、带有噪声的奖励数值中学习。另一个问题是大多数深度学习算法都需要假定数据样本之间是独立的，但强化学习的数据是一连串高度关联的序列。</p>
+<p>为了解决这些问题，DQN 算法利用了 <strong>经验回放机制</strong> 和 <strong>设置目标网络与评估网络</strong> 。</p>
+<p>有两篇论文提出了 DQN 算法，分别是：</p>
+<blockquote>
+<ol type="1">
+<li><em>Mnih V, Kavukcuoglu K, Silver D, et al. Playing Atari with Deep Reinforcement Learning[J]. Computer Science, 2013.</em></li>
+<li><em>Mnih V, Kavukcuoglu K, Silver D, et al. Human-level control through deep reinforcement learning[J]. Nature, 2015, 518(7540):529.</em></li>
+</ol>
+</blockquote>
+<p>后一篇论文比前一篇多了目标、评估网络的特性。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/05/07/Deep-Q-Network/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://bluefisher.github.io/2018/05/07/%E6%90%AD%E5%BB%BAshadowsocks%E6%9C%8D%E5%8A%A1%E5%99%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -587,7 +806,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">63</span>
+          <span class="site-state-item-count">65</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
